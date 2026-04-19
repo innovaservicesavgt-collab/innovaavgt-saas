@@ -12,6 +12,7 @@ import {
   BookOpen,
   LogOut,
   Scale,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/legal/cases', icon: Briefcase, label: 'Expedientes' },
   { href: '/legal/calendar', icon: Calendar, label: 'Agenda' },
   { href: '/legal/clients', icon: Users, label: 'Clientes' },
+  { href: '/legal/finances', icon: DollarSign, label: 'Finanzas' },
   { href: '/legal/documents', icon: FileText, label: 'Documentos' },
   { href: '/legal/actions', icon: BookOpen, label: 'Actuaciones' },
 ];
@@ -54,7 +56,8 @@ export function LegalSidebar() {
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(item.href + '/');
+          const active =
+            pathname === item.href || pathname.startsWith(item.href + '/');
 
           return (
             <Link
