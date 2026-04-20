@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { CaseDetailHeader } from './case-detail-header';
 import { CaseFormDialog } from '@/app/legal/cases/components/case-form-dialog';
 import type { LegalCaseWithRelations } from '@/app/legal/cases/types';
-
-type ClientOption = {
-  id: string;
-  nombre: string;
-};
+import type { ClientOption } from '@/app/legal/cases/components/client-selector';
+import type {
+  CatalogJuzgado,
+  CatalogFiscalia,
+  CatalogTipoProceso,
+} from '@/app/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;
@@ -21,28 +22,37 @@ type Props = {
   caseData: LegalCaseWithRelations;
   clients: ClientOption[];
   abogados: AbogadoOption[];
+  juzgados: CatalogJuzgado[];
+  fiscalias: CatalogFiscalia[];
+  tiposProceso: CatalogTipoProceso[];
 };
 
 /**
  * Sección cliente del detalle de expediente.
  * Maneja el header + modal de edición.
- * Separado del wrapper para que los tabs puedan seguir siendo Server Components.
  */
-export function CaseHeaderSection({ caseData, clients, abogados }: Props) {
+export function CaseHeaderSection({
+  caseData,
+  clients,
+  abogados,
+  juzgados,
+  fiscalias,
+  tiposProceso,
+}: Props) {
   const [editOpen, setEditOpen] = useState(false);
 
   return (
     <>
-      <CaseDetailHeader
-        caseData={caseData}
-        onEdit={() => setEditOpen(true)}
-      />
+      <CaseDetailHeader caseData={caseData} onEdit={() => setEditOpen(true)} />
 
       <CaseFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
         clients={clients}
         abogados={abogados}
+        juzgados={juzgados}
+        fiscalias={fiscalias}
+        tiposProceso={tiposProceso}
         editingCase={caseData}
       />
     </>

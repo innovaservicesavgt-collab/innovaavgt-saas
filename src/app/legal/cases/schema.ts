@@ -1,53 +1,70 @@
 import { z } from 'zod';
 
 export const caseSchema = z.object({
-  numero_judicial: z.string()
+  numero_judicial: z
+    .string()
     .max(100, 'Número judicial muy largo')
     .optional()
     .or(z.literal('')),
 
   materia: z.enum([
-    'PENAL', 'CIVIL', 'LABORAL', 'ADMINISTRATIVO',
-    'NOTARIAL', 'FAMILIA', 'MERCANTIL', 'OTROS',
+    'PENAL',
+    'CIVIL',
+    'LABORAL',
+    'ADMINISTRATIVO',
+    'NOTARIAL',
+    'FAMILIA',
+    'MERCANTIL',
+    'OTROS',
   ]),
 
-  tipo_proceso: z.string()
+  // Campo legado (texto libre) — se mantiene para retro-compatibilidad
+  tipo_proceso: z
+    .string()
     .max(200, 'Tipo de proceso muy largo')
     .optional()
     .or(z.literal('')),
 
-  estado_procesal: z.string()
+  estado_procesal: z
+    .string()
     .max(100, 'Estado procesal muy largo')
     .optional()
     .or(z.literal('')),
 
-  client_id: z.string()
-    .uuid('Debe seleccionar un cliente válido'),
+  client_id: z.string().uuid('Debe seleccionar un cliente válido'),
 
-  parte_contraria: z.string()
+  parte_contraria: z
+    .string()
     .max(300, 'Parte contraria muy larga')
     .optional()
     .or(z.literal('')),
 
-  organo_jurisdiccional: z.string()
+  // Campo legado (texto libre) — se mantiene para retro-compatibilidad
+  organo_jurisdiccional: z
+    .string()
     .max(300, 'Órgano jurisdiccional muy largo')
     .optional()
     .or(z.literal('')),
 
-  abogado_responsable_id: z.string()
-    .uuid('Debe seleccionar un abogado responsable'),
+  abogado_responsable_id: z.string().uuid('Debe seleccionar un abogado responsable'),
 
-  fecha_inicio: z.string()
-    .min(1, 'La fecha de inicio es obligatoria'),
+  fecha_inicio: z.string().min(1, 'La fecha de inicio es obligatoria'),
 
-  proxima_actuacion: z.string()
-    .optional()
-    .or(z.literal('')),
+  proxima_actuacion: z.string().optional().or(z.literal('')),
 
-  observaciones: z.string()
+  observaciones: z
+    .string()
     .max(5000, 'Observaciones muy largas')
     .optional()
     .or(z.literal('')),
+
+  // ============================================================
+  // NUEVOS CAMPOS FASE 12 — referencias a catálogos
+  // ============================================================
+
+  juzgado_id: z.string().uuid().nullable().optional().or(z.literal('')),
+  fiscalia_id: z.string().uuid().nullable().optional().or(z.literal('')),
+  tipo_proceso_id: z.string().uuid().nullable().optional().or(z.literal('')),
 });
 
 export type CaseFormData = z.infer<typeof caseSchema>;

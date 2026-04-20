@@ -1,37 +1,53 @@
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CasesPageClient } from './components/cases-page-client';
-import { LegalCaseWithRelations } from './types';
+import type { LegalCaseWithRelations } from './types';
+import {
+  getJuzgados,
+  getFiscalias,
+  getTiposProceso,
+} from '@/app/legal/catalogs/actions';
 
 export default async function LegalCasesPage() {
   const supabase = await createServerSupabase();
 
-  // Cargar expedientes con cliente y abogado relacionados
-  const { data: cases, error: casesError } = await supabase
-    .from('legal_cases')
-    .select(`
-      *,
-      client:legal_clients (id, nombre, tipo_persona),
-      abogado:profiles!abogado_responsable_id (id, first_name, last_name)
-    `)
-    .order('created_at', { ascending: false });
+  // Cargar todo en paralelo
+  const [
+    casesRes,
+    clientsRes,
+    abogadosRes,
+    juzgados,
+    fiscalias,
+    tiposProceso,
+  ] = await Promise.all([
+    supabase
+      .from('legal_cases')
+      .select(`
+        *,
+        client:legal_clients (id, nombre, tipo_persona),
+        abogado:profiles!abogado_responsable_id (id, first_name, last_name)
+      `)
+      .order('created_at', { ascending: false }),
 
-  if (casesError) {
-    console.error('Error loading cases:', casesError);
+    supabase
+      .from('legal_clients')
+      .select('id, nombre, tipo_persona, dpi, nit')
+      .eq('activo', true)
+      .order('nombre'),
+
+    supabase
+      .from('profiles')
+      .select('id, first_name, last_name, email, role:roles(name)')
+      .eq('is_active', true)
+      .order('first_name'),
+
+    getJuzgados(),
+    getFiscalias(),
+    getTiposProceso(),
+  ]);
+
+  if (casesRes.error) {
+    console.error('Error loading cases:', casesRes.error);
   }
-
-  // Cargar clientes activos para el selector del formulario
-  const { data: clients } = await supabase
-    .from('legal_clients')
-    .select('id, nombre, tipo_persona, dpi, nit')
-    .eq('activo', true)
-    .order('nombre');
-
-  // Cargar abogados del tenant (profiles con rol admin o professional)
-  const { data: abogados } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, email, role:roles(name)')
-    .eq('is_active', true)
-    .order('first_name');
 
   return (
     <div className="space-y-6">
@@ -41,9 +57,12 @@ export default async function LegalCasesPage() {
       </div>
 
       <CasesPageClient
-        initialCases={(cases as LegalCaseWithRelations[]) || []}
-        clients={clients || []}
-        abogados={abogados || []}
+        initialCases={(casesRes.data as LegalCaseWithRelations[]) || []}
+        clients={clientsRes.data || []}
+        abogados={abogadosRes.data || []}
+        juzgados={juzgados}
+        fiscalias={fiscalias}
+        tiposProceso={tiposProceso}
       />
     </div>
   );

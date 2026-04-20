@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { FileText, Users, Scale } from 'lucide-react';
+import { FileText, Users, Scale, Landmark } from 'lucide-react';
 
 import { caseSchema, CaseFormData } from '../schema';
 import { createCase, updateCase } from '../actions';
@@ -32,10 +32,19 @@ import { LegalCaseWithRelations } from '../types';
 import {
   MATERIAS,
   ESTADOS_PROCESALES,
-  TIPOS_PROCESO_POR_MATERIA,
   Materia,
 } from '../constants';
 import { ClientSelector, ClientOption } from './client-selector';
+
+// NUEVOS IMPORTS — Catálogos Fase 12
+import { JuzgadoCombobox } from '@/app/legal/catalogs/components/juzgado-combobox';
+import { FiscaliaCombobox } from '@/app/legal/catalogs/components/fiscalia-combobox';
+import { TipoProcesoCombobox } from '@/app/legal/catalogs/components/tipo-proceso-combobox';
+import type {
+  CatalogJuzgado,
+  CatalogFiscalia,
+  CatalogTipoProceso,
+} from '@/app/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;
@@ -50,7 +59,26 @@ type Props = {
   editingCase?: LegalCaseWithRelations | null;
   clients: ClientOption[];
   abogados: AbogadoOption[];
+  juzgados: CatalogJuzgado[];
+  fiscalias: CatalogFiscalia[];
+  tiposProceso: CatalogTipoProceso[];
 };
+
+// Mapeo materia legal_cases -> materia catálogos
+// Algunos valores cambian de nombre entre las dos enums
+function mapMateriaACatalogo(materia: Materia): string {
+  const mapa: Record<string, string> = {
+    PENAL: 'PENAL',
+    CIVIL: 'CIVIL',
+    LABORAL: 'LABORAL',
+    ADMINISTRATIVO: 'ADMINISTRATIVO',
+    NOTARIAL: 'CIVIL', // Notarial se maneja como civil en el catálogo
+    FAMILIA: 'FAMILIA',
+    MERCANTIL: 'MERCANTIL',
+    OTROS: '', // sin filtro
+  };
+  return mapa[materia] || '';
+}
 
 export function CaseFormDialog({
   open,
@@ -58,6 +86,9 @@ export function CaseFormDialog({
   editingCase,
   clients,
   abogados,
+  juzgados,
+  fiscalias,
+  tiposProceso,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const isEditing = !!editingCase;
@@ -83,6 +114,9 @@ export function CaseFormDialog({
       fecha_inicio: new Date().toISOString().split('T')[0],
       proxima_actuacion: '',
       observaciones: '',
+      juzgado_id: '',
+      fiscalia_id: '',
+      tipo_proceso_id: '',
     },
   });
 
@@ -105,6 +139,9 @@ export function CaseFormDialog({
           ? editingCase.proxima_actuacion.split('T')[0]
           : '',
         observaciones: editingCase.observaciones ?? '',
+        juzgado_id: editingCase.juzgado_id ?? '',
+        fiscalia_id: editingCase.fiscalia_id ?? '',
+        tipo_proceso_id: editingCase.tipo_proceso_id ?? '',
       });
     } else {
       reset({
@@ -119,6 +156,9 @@ export function CaseFormDialog({
         fecha_inicio: new Date().toISOString().split('T')[0],
         proxima_actuacion: '',
         observaciones: '',
+        juzgado_id: '',
+        fiscalia_id: '',
+        tipo_proceso_id: '',
       });
     }
   }, [editingCase, open, reset, abogados]);
@@ -126,9 +166,12 @@ export function CaseFormDialog({
   const materiaActual = watch('materia');
   const clienteActual = watch('client_id');
   const abogadoActual = watch('abogado_responsable_id');
+  const juzgadoActual = watch('juzgado_id');
+  const fiscaliaActual = watch('fiscalia_id');
+  const tipoProcesoActual = watch('tipo_proceso_id');
 
-  // Tipos de proceso disponibles según materia
-  const tiposDisponibles = TIPOS_PROCESO_POR_MATERIA[materiaActual as Materia] ?? [];
+  const materiaCatalogo = mapMateriaACatalogo(materiaActual);
+  const esPenal = materiaActual === 'PENAL';
 
   const onSubmit = (data: CaseFormData) => {
     startTransition(async () => {
@@ -151,7 +194,9 @@ export function CaseFormDialog({
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? `Editar expediente ${editingCase?.numero_interno}` : 'Nuevo expediente'}
+            {isEditing
+              ? `Editar expediente ${editingCase?.numero_interno}`
+              : 'Nuevo expediente'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
@@ -161,9 +206,9 @@ export function CaseFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* ══════════════════════════════════════════════════════ */}
+          {/* ============================================================ */}
           {/* SECCIÓN 1: INFORMACIÓN GENERAL */}
-          {/* ══════════════════════════════════════════════════════ */}
+          {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <FileText className="w-4 h-4" />
@@ -178,7 +223,9 @@ export function CaseFormDialog({
                   value={materiaActual}
                   onValueChange={(val) => {
                     setValue('materia', val as Materia);
-                    // Limpiar tipo de proceso al cambiar materia
+                    // Al cambiar materia, limpiar los combobox dependientes
+                    setValue('tipo_proceso_id', '');
+                    setValue('juzgado_id', '');
                     setValue('tipo_proceso', '');
                   }}
                 >
@@ -196,26 +243,6 @@ export function CaseFormDialog({
                 {errors.materia && (
                   <p className="text-sm text-red-600">{errors.materia.message}</p>
                 )}
-              </div>
-
-              {/* Tipo de proceso */}
-              <div className="space-y-2">
-                <Label htmlFor="tipo_proceso">Tipo de proceso</Label>
-                <Select
-                  value={watch('tipo_proceso') || ''}
-                  onValueChange={(val) => setValue('tipo_proceso', val)}
-                >
-                  <SelectTrigger id="tipo_proceso">
-                    <SelectValue placeholder="Selecciona..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposDisponibles.map((tipo) => (
-                      <SelectItem key={tipo} value={tipo}>
-                        {tipo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Estado procesal */}
@@ -247,7 +274,9 @@ export function CaseFormDialog({
                   placeholder="Ej: 01043-2026-00123"
                 />
                 {errors.numero_judicial && (
-                  <p className="text-sm text-red-600">{errors.numero_judicial.message}</p>
+                  <p className="text-sm text-red-600">
+                    {errors.numero_judicial.message}
+                  </p>
                 )}
               </div>
 
@@ -260,7 +289,9 @@ export function CaseFormDialog({
                   {...register('fecha_inicio')}
                 />
                 {errors.fecha_inicio && (
-                  <p className="text-sm text-red-600">{errors.fecha_inicio.message}</p>
+                  <p className="text-sm text-red-600">
+                    {errors.fecha_inicio.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -268,9 +299,73 @@ export function CaseFormDialog({
 
           <Separator />
 
-          {/* ══════════════════════════════════════════════════════ */}
-          {/* SECCIÓN 2: PARTES DEL PROCESO */}
-          {/* ══════════════════════════════════════════════════════ */}
+          {/* ============================================================ */}
+          {/* SECCIÓN 2: ÓRGANO JURISDICCIONAL Y PROCESO (NUEVO FASE 12) */}
+          {/* ============================================================ */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+              <Landmark className="w-4 h-4" />
+              Órgano jurisdiccional y proceso
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {/* Tipo de proceso (combobox) */}
+              <div className="space-y-2">
+                <Label>Tipo de proceso</Label>
+                <TipoProcesoCombobox
+                  tiposProceso={tiposProceso}
+                  value={tipoProcesoActual}
+                  onChange={(val) => setValue('tipo_proceso_id', val ?? '')}
+                  materiaFiltro={materiaCatalogo || undefined}
+                  placeholder={
+                    materiaCatalogo
+                      ? `Tipos de proceso de ${materiaActual.toLowerCase()}...`
+                      : 'Buscar tipo de proceso...'
+                  }
+                />
+                <p className="text-xs text-gray-500">
+                  Filtrado automáticamente por materia seleccionada
+                </p>
+              </div>
+
+              {/* Juzgado (combobox) */}
+              <div className="space-y-2">
+                <Label>Juzgado</Label>
+                <JuzgadoCombobox
+                  juzgados={juzgados}
+                  value={juzgadoActual}
+                  onChange={(val) => setValue('juzgado_id', val ?? '')}
+                  materiaFiltro={materiaCatalogo || undefined}
+                  placeholder="Buscar juzgado..."
+                />
+                <p className="text-xs text-gray-500">
+                  Selecciona el juzgado donde se tramita el expediente
+                </p>
+              </div>
+
+              {/* Fiscalía — solo si es penal */}
+              {esPenal && (
+                <div className="space-y-2">
+                  <Label>Fiscalía del MP</Label>
+                  <FiscaliaCombobox
+                    fiscalias={fiscalias}
+                    value={fiscaliaActual}
+                    onChange={(val) => setValue('fiscalia_id', val ?? '')}
+                    placeholder="Buscar fiscalía..."
+                  />
+                  <p className="text-xs text-gray-500">
+                    Fiscalía del Ministerio Público encargada del caso
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* ============================================================ */}
+          {/* SECCIÓN 3: PARTES DEL PROCESO */}
+          {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <Users className="w-4 h-4" />
@@ -282,8 +377,8 @@ export function CaseFormDialog({
               <Label>Cliente *</Label>
               {clients.length === 0 ? (
                 <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
-                  No hay clientes registrados. 
-                  Ve a <strong>Clientes</strong> y crea al menos uno antes de registrar expedientes.
+                  No hay clientes registrados. Ve a <strong>Clientes</strong> y
+                  crea al menos uno antes de registrar expedientes.
                 </div>
               ) : (
                 <ClientSelector
@@ -306,21 +401,8 @@ export function CaseFormDialog({
                 placeholder="Nombre de la contraparte"
               />
               {errors.parte_contraria && (
-                <p className="text-sm text-red-600">{errors.parte_contraria.message}</p>
-              )}
-            </div>
-
-            {/* Órgano jurisdiccional */}
-            <div className="space-y-2">
-              <Label htmlFor="organo_jurisdiccional">Órgano jurisdiccional</Label>
-              <Input
-                id="organo_jurisdiccional"
-                {...register('organo_jurisdiccional')}
-                placeholder="Ej: Juzgado Primero de Primera Instancia Civil"
-              />
-              {errors.organo_jurisdiccional && (
                 <p className="text-sm text-red-600">
-                  {errors.organo_jurisdiccional.message}
+                  {errors.parte_contraria.message}
                 </p>
               )}
             </div>
@@ -328,9 +410,9 @@ export function CaseFormDialog({
 
           <Separator />
 
-          {/* ══════════════════════════════════════════════════════ */}
-          {/* SECCIÓN 3: RESPONSABLE Y FECHAS */}
-          {/* ══════════════════════════════════════════════════════ */}
+          {/* ============================================================ */}
+          {/* SECCIÓN 4: RESPONSABLE Y SEGUIMIENTO */}
+          {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <Scale className="w-4 h-4" />
@@ -340,17 +422,22 @@ export function CaseFormDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Abogado responsable */}
               <div className="space-y-2">
-                <Label htmlFor="abogado_responsable_id">Abogado responsable *</Label>
+                <Label htmlFor="abogado_responsable_id">
+                  Abogado responsable *
+                </Label>
                 <Select
                   value={abogadoActual}
-                  onValueChange={(val) => setValue('abogado_responsable_id', val)}
+                  onValueChange={(val) =>
+                    setValue('abogado_responsable_id', val)
+                  }
                 >
                   <SelectTrigger id="abogado_responsable_id">
                     <SelectValue placeholder="Selecciona..." />
                   </SelectTrigger>
                   <SelectContent>
                     {abogados.map((a) => {
-                      const nombre = `${a.first_name} ${a.last_name}`.trim() || a.email;
+                      const nombre =
+                        `${a.first_name} ${a.last_name}`.trim() || a.email;
                       return (
                         <SelectItem key={a.id} value={a.id}>
                           {nombre}
@@ -387,7 +474,9 @@ export function CaseFormDialog({
                 rows={4}
               />
               {errors.observaciones && (
-                <p className="text-sm text-red-600">{errors.observaciones.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.observaciones.message}
+                </p>
               )}
             </div>
           </div>
@@ -402,10 +491,7 @@ export function CaseFormDialog({
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isPending || clients.length === 0}
-            >
+            <Button type="submit" disabled={isPending || clients.length === 0}>
               {isPending
                 ? 'Guardando...'
                 : isEditing

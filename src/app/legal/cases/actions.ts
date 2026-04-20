@@ -19,7 +19,6 @@ async function generarNumeroInterno(
   const year = new Date().getFullYear();
   const prefix = `${year}-${materiaPrefix(materia)}`;
 
-  // Buscar el último correlativo de ese prefijo en este tenant
   const { data: ultimo } = await supabase
     .from('legal_cases')
     .select('numero_interno')
@@ -39,6 +38,14 @@ async function generarNumeroInterno(
   }
 
   return `${prefix}-${String(siguiente).padStart(4, '0')}`;
+}
+
+/**
+ * Normaliza un UUID opcional: convierte '' y undefined en null.
+ */
+function normalizeUuid(value: string | null | undefined): string | null {
+  if (!value || value === '' || value === 'null') return null;
+  return value;
 }
 
 /**
@@ -78,25 +85,31 @@ export async function createCase(data: CaseFormData): Promise<ActionResult> {
       fecha_inicio: parsed.data.fecha_inicio,
       proxima_actuacion: parsed.data.proxima_actuacion || null,
       observaciones: parsed.data.observaciones?.trim() || null,
+      // NUEVOS CAMPOS FASE 12
+      juzgado_id: normalizeUuid(parsed.data.juzgado_id),
+      fiscalia_id: normalizeUuid(parsed.data.fiscalia_id),
+      tipo_proceso_id: normalizeUuid(parsed.data.tipo_proceso_id),
     };
 
-    const { data: inserted, error } = await supabase
+    const { data: created, error } = await supabase
       .from('legal_cases')
       .insert(cleanData)
       .select('id, numero_interno')
       .single();
 
-    if (error) {
+    if (error || !created) {
       console.error('Error creating case:', error);
       return { success: false, error: 'No se pudo crear el expediente' };
     }
 
     revalidatePath('/legal/cases');
+    revalidatePath('/legal/dashboard');
+
     return {
       success: true,
-      message: `Expediente ${inserted.numero_interno} creado`,
-      caseId: inserted.id,
-      numero: inserted.numero_interno,
+      message: `Expediente ${created.numero_interno} creado`,
+      caseId: created.id,
+      numero: created.numero_interno,
     };
   } catch (err) {
     console.error('Unexpected error in createCase:', err);
@@ -108,7 +121,7 @@ export async function createCase(data: CaseFormData): Promise<ActionResult> {
  * Actualizar un expediente existente
  */
 export async function updateCase(
-  id: string,
+  caseId: string,
   data: CaseFormData
 ): Promise<ActionResult> {
   try {
@@ -136,12 +149,17 @@ export async function updateCase(
       fecha_inicio: parsed.data.fecha_inicio,
       proxima_actuacion: parsed.data.proxima_actuacion || null,
       observaciones: parsed.data.observaciones?.trim() || null,
+      // NUEVOS CAMPOS FASE 12
+      juzgado_id: normalizeUuid(parsed.data.juzgado_id),
+      fiscalia_id: normalizeUuid(parsed.data.fiscalia_id),
+      tipo_proceso_id: normalizeUuid(parsed.data.tipo_proceso_id),
+      updated_at: new Date().toISOString(),
     };
 
     const { error } = await supabase
       .from('legal_cases')
       .update(cleanData)
-      .eq('id', id);
+      .eq('id', caseId);
 
     if (error) {
       console.error('Error updating case:', error);
@@ -149,6 +167,9 @@ export async function updateCase(
     }
 
     revalidatePath('/legal/cases');
+    revalidatePath(`/legal/cases/${caseId}`);
+    revalidatePath('/legal/dashboard');
+
     return { success: true, message: 'Expediente actualizado' };
   } catch (err) {
     console.error('Unexpected error in updateCase:', err);
@@ -157,24 +178,45 @@ export async function updateCase(
 }
 
 /**
- * Archivar un expediente (no se borra, se marca archivado=true)
+ * Archivar un expediente (soft delete).
+ * Si ya está archivado, lo desarchiva (toggle).
  */
-export async function archiveCase(id: string): Promise<ActionResult> {
+export async function archiveCase(caseId: string): Promise<ActionResult> {
   try {
     await requireVertical('legal');
     const supabase = await createServerSupabase();
 
+    const { data: current } = await supabase
+      .from('legal_cases')
+      .select('archivado')
+      .eq('id', caseId)
+      .single();
+
+    if (!current) {
+      return { success: false, error: 'Expediente no encontrado' };
+    }
+
     const { error } = await supabase
       .from('legal_cases')
-      .update({ archivado: true })
-      .eq('id', id);
+      .update({
+        archivado: !current.archivado,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', caseId);
 
     if (error) {
       return { success: false, error: 'No se pudo archivar el expediente' };
     }
 
     revalidatePath('/legal/cases');
-    return { success: true, message: 'Expediente archivado' };
+    revalidatePath(`/legal/cases/${caseId}`);
+
+    return {
+      success: true,
+      message: current.archivado
+        ? 'Expediente reactivado'
+        : 'Expediente archivado',
+    };
   } catch (err) {
     console.error('Unexpected error in archiveCase:', err);
     return { success: false, error: 'Error inesperado' };
@@ -182,23 +224,30 @@ export async function archiveCase(id: string): Promise<ActionResult> {
 }
 
 /**
- * Reactivar un expediente archivado
+ * Desarchivar un expediente (reactivar).
+ * Usado explícitamente desde la tabla cuando el estado es "archivado".
  */
-export async function unarchiveCase(id: string): Promise<ActionResult> {
+export async function unarchiveCase(caseId: string): Promise<ActionResult> {
   try {
     await requireVertical('legal');
     const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from('legal_cases')
-      .update({ archivado: false })
-      .eq('id', id);
+      .update({
+        archivado: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', caseId);
 
     if (error) {
+      console.error('Error unarchiving case:', error);
       return { success: false, error: 'No se pudo reactivar el expediente' };
     }
 
     revalidatePath('/legal/cases');
+    revalidatePath(`/legal/cases/${caseId}`);
+
     return { success: true, message: 'Expediente reactivado' };
   } catch (err) {
     console.error('Unexpected error in unarchiveCase:', err);
@@ -207,42 +256,26 @@ export async function unarchiveCase(id: string): Promise<ActionResult> {
 }
 
 /**
- * Eliminar un expediente (SOLO si no tiene datos asociados)
- * Usar con precaución. Preferir archiveCase en la mayoría de casos.
+ * Eliminar un expediente permanentemente
  */
-export async function deleteCase(id: string): Promise<ActionResult> {
+export async function deleteCase(caseId: string): Promise<ActionResult> {
   try {
     await requireVertical('legal');
     const supabase = await createServerSupabase();
 
-    // Contar datos asociados
-    const { count: docsCount } = await supabase
-      .from('legal_documents')
-      .select('*', { count: 'exact', head: true })
-      .eq('case_id', id);
-
-    const { count: eventsCount } = await supabase
-      .from('legal_events')
-      .select('*', { count: 'exact', head: true })
-      .eq('case_id', id);
-
-    if ((docsCount ?? 0) > 0 || (eventsCount ?? 0) > 0) {
-      return {
-        success: false,
-        error: `No se puede eliminar: tiene ${docsCount ?? 0} documento(s) y ${eventsCount ?? 0} evento(s). Mejor archívalo.`,
-      };
-    }
-
     const { error } = await supabase
       .from('legal_cases')
       .delete()
-      .eq('id', id);
+      .eq('id', caseId);
 
     if (error) {
+      console.error('Error deleting case:', error);
       return { success: false, error: 'No se pudo eliminar el expediente' };
     }
 
     revalidatePath('/legal/cases');
+    revalidatePath('/legal/dashboard');
+
     return { success: true, message: 'Expediente eliminado' };
   } catch (err) {
     console.error('Unexpected error in deleteCase:', err);

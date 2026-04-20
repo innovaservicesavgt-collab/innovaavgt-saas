@@ -1,7 +1,12 @@
 import { notFound } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CaseTabsWrapper } from './components/case-tabs-wrapper';
-import { LegalCaseWithRelations } from '../types';
+import type { LegalCaseWithRelations } from '../types';
+import {
+  getJuzgados,
+  getFiscalias,
+  getTiposProceso,
+} from '@/app/legal/catalogs/actions';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -11,39 +16,62 @@ export default async function CaseDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createServerSupabase();
 
-  // Cargar expediente con relaciones
-  const { data: caseData, error } = await supabase
+  // Query principal del expediente con joins
+  const { data: caseData, error: caseError } = await supabase
     .from('legal_cases')
     .select(`
       *,
       client:legal_clients (id, nombre, tipo_persona),
-      abogado:profiles!abogado_responsable_id (id, first_name, last_name)
+      abogado:profiles!abogado_responsable_id (id, first_name, last_name),
+      juzgado:legal_catalog_juzgados!juzgado_id (
+        id, nombre, nombre_corto, departamento, municipio, materia, instancia
+      ),
+      fiscalia:legal_catalog_fiscalias!fiscalia_id (
+        id, nombre, nombre_corto, departamento, municipio, tipo
+      ),
+      tipo_proceso_catalogo:legal_catalog_tipos_proceso!tipo_proceso_id (
+        id, nombre, via_procesal, descripcion
+      )
     `)
     .eq('id', id)
     .maybeSingle();
 
-  if (error || !caseData) {
+  if (caseError) {
+    console.error('Error loading case:', caseError);
+  }
+
+  if (!caseData) {
     notFound();
   }
 
-  // Cargar listas para el modal de edición
-  const { data: clients } = await supabase
-    .from('legal_clients')
-    .select('id, nombre, tipo_persona, dpi, nit')
-    .eq('activo', true)
-    .order('nombre');
+  // Cargar listas y catálogos en paralelo
+  const [clientsRes, abogadosRes, juzgados, fiscalias, tiposProceso] =
+    await Promise.all([
+      supabase
+        .from('legal_clients')
+        .select('id, nombre, tipo_persona, dpi, nit')
+        .eq('activo', true)
+        .order('nombre'),
 
-  const { data: abogados } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, email')
-    .eq('is_active', true)
-    .order('first_name');
+      supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .eq('is_active', true)
+        .order('first_name'),
+
+      getJuzgados(),
+      getFiscalias(),
+      getTiposProceso(),
+    ]);
 
   return (
     <CaseTabsWrapper
-      caseData={caseData as LegalCaseWithRelations}
-      clients={clients || []}
-      abogados={abogados || []}
+      caseData={caseData as unknown as LegalCaseWithRelations}
+      clients={clientsRes.data || []}
+      abogados={abogadosRes.data || []}
+      juzgados={juzgados}
+      fiscalias={fiscalias}
+      tiposProceso={tiposProceso}
     />
   );
 }

@@ -13,6 +13,7 @@ import {
   LogOut,
   Scale,
   DollarSign,
+  Library,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ const navItems = [
   { href: '/legal/finances', icon: DollarSign, label: 'Finanzas' },
   { href: '/legal/documents', icon: FileText, label: 'Documentos' },
   { href: '/legal/actions', icon: BookOpen, label: 'Actuaciones' },
+  { href: '/legal/catalogs', icon: Library, label: 'Catálogos' },
 ];
 
 export function LegalSidebar() {

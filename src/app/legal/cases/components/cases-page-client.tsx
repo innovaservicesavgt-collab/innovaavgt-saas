@@ -3,8 +3,13 @@
 import { useState } from 'react';
 import { CasesTable } from './cases-table';
 import { CaseFormDialog } from './case-form-dialog';
-import { LegalCaseWithRelations } from '../types';
-import { ClientOption } from './client-selector';
+import type { LegalCaseWithRelations } from '../types';
+import type { ClientOption } from './client-selector';
+import type {
+  CatalogJuzgado,
+  CatalogFiscalia,
+  CatalogTipoProceso,
+} from '@/app/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;
@@ -17,10 +22,22 @@ type Props = {
   initialCases: LegalCaseWithRelations[];
   clients: ClientOption[];
   abogados: AbogadoOption[];
+  juzgados: CatalogJuzgado[];
+  fiscalias: CatalogFiscalia[];
+  tiposProceso: CatalogTipoProceso[];
 };
 
-export function CasesPageClient({ initialCases, clients, abogados }: Props) {
-  const [editingCase, setEditingCase] = useState<LegalCaseWithRelations | null>(null);
+export function CasesPageClient({
+  initialCases,
+  clients,
+  abogados,
+  juzgados,
+  fiscalias,
+  tiposProceso,
+}: Props) {
+  const [editingCase, setEditingCase] = useState<LegalCaseWithRelations | null>(
+    null
+  );
   const [formOpen, setFormOpen] = useState(false);
 
   const handleNew = () => {
@@ -40,13 +57,15 @@ export function CasesPageClient({ initialCases, clients, abogados }: Props) {
         onNewCase={handleNew}
         onEditCase={handleEdit}
       />
-
       <CaseFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
         editingCase={editingCase}
         clients={clients}
         abogados={abogados}
+        juzgados={juzgados}
+        fiscalias={fiscalias}
+        tiposProceso={tiposProceso}
       />
     </div>
   );

@@ -7,11 +7,12 @@ import { CaseDocumentsTab } from './case-documents-tab';
 import { CaseActionsTab } from './case-actions-tab';
 import { CaseFinancesTab } from './case-finances-tab';
 import type { LegalCaseWithRelations } from '@/app/legal/cases/types';
-
-type ClientOption = {
-  id: string;
-  nombre: string;
-};
+import type { ClientOption } from '@/app/legal/cases/components/client-selector';
+import type {
+  CatalogJuzgado,
+  CatalogFiscalia,
+  CatalogTipoProceso,
+} from '@/app/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;
@@ -24,16 +25,28 @@ type Props = {
   caseData: LegalCaseWithRelations;
   clients: ClientOption[];
   abogados: AbogadoOption[];
+  juzgados: CatalogJuzgado[];
+  fiscalias: CatalogFiscalia[];
+  tiposProceso: CatalogTipoProceso[];
 };
 
-export function CaseTabsWrapper({ caseData, clients, abogados }: Props) {
+export function CaseTabsWrapper({
+  caseData,
+  clients,
+  abogados,
+  juzgados,
+  fiscalias,
+  tiposProceso,
+}: Props) {
   return (
     <div className="space-y-6">
-      {/* Header con modal de edición (Client Component interno) */}
       <CaseHeaderSection
         caseData={caseData}
         clients={clients}
         abogados={abogados}
+        juzgados={juzgados}
+        fiscalias={fiscalias}
+        tiposProceso={tiposProceso}
       />
 
       <Tabs defaultValue="info" className="w-full">
