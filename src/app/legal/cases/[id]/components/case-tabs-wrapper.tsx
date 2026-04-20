@@ -1,19 +1,16 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Calendar, BookOpen, Paperclip, DollarSign } from 'lucide-react';
+import { CaseHeaderSection } from './case-header-section';
 import { CaseInfoTab } from './case-info-tab';
 import { CaseAgendaTab } from './case-agenda-tab';
 import { CaseDocumentsTab } from './case-documents-tab';
 import { CaseActionsTab } from './case-actions-tab';
-import { CaseDetailHeader } from './case-detail-header';
-import { LegalCaseWithRelations } from '@/app/legal/cases/types';
 import { CaseFinancesTab } from './case-finances-tab';
+import type { LegalCaseWithRelations } from '@/app/legal/cases/types';
 
 type ClientOption = {
   id: string;
   nombre: string;
-  tipo_persona: string;
-  dpi: string | null;
-  nit: string | null;
 };
 
 type AbogadoOption = {
@@ -32,7 +29,12 @@ type Props = {
 export function CaseTabsWrapper({ caseData, clients, abogados }: Props) {
   return (
     <div className="space-y-6">
-      <CaseDetailHeader caseData={caseData} />
+      {/* Header con modal de edición (Client Component interno) */}
+      <CaseHeaderSection
+        caseData={caseData}
+        clients={clients}
+        abogados={abogados}
+      />
 
       <Tabs defaultValue="info" className="w-full">
         <TabsList>
@@ -53,9 +55,9 @@ export function CaseTabsWrapper({ caseData, clients, abogados }: Props) {
             <span className="hidden sm:inline">Actuaciones</span>
           </TabsTrigger>
           <TabsTrigger value="finances">
-  <DollarSign className="w-4 h-4 mr-2" />
-  <span className="hidden sm:inline">Honorarios</span>
-</TabsTrigger>
+            <DollarSign className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Honorarios</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="mt-6">
@@ -63,25 +65,23 @@ export function CaseTabsWrapper({ caseData, clients, abogados }: Props) {
         </TabsContent>
 
         <TabsContent value="agenda" className="mt-6">
-          <CaseAgendaTab 
-            caseId={caseData.id} 
-            caseNumber={caseData.numero_interno} 
-          />
+          <CaseAgendaTab caseId={caseData.id} />
         </TabsContent>
 
         <TabsContent value="documents" className="mt-6">
-          <CaseDocumentsTab 
-            caseId={caseData.id} 
-            caseNumber={caseData.numero_interno} 
+          <CaseDocumentsTab
+            caseId={caseData.id}
+            caseNumber={caseData.numero_interno}
           />
         </TabsContent>
 
         <TabsContent value="actions" className="mt-6">
           <CaseActionsTab caseId={caseData.id} />
         </TabsContent>
+
         <TabsContent value="finances" className="mt-6">
-  <CaseFinancesTab caseId={caseData.id} />
-</TabsContent>
+          <CaseFinancesTab caseId={caseData.id} />
+        </TabsContent>
       </Tabs>
     </div>
   );

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireVertical } from '@/lib/vertical';
 import { feeAgreementSchema } from './schema';
-import {
+import type {
   ActionResult,
   CreateAgreementInput,
   FeeAgreementWithInstallments,
@@ -14,13 +14,9 @@ import {
 } from './types';
 
 // ============================================================
-// CREAR O ACTUALIZAR ACUERDO DE HONORARIOS
+// CREAR ACUERDO DE HONORARIOS
 // ============================================================
 
-/**
- * Crea un nuevo acuerdo de honorarios.
- * Si ya existe uno para el expediente, devuelve error (usar updateAgreement).
- */
 export async function createAgreement(
   input: CreateAgreementInput
 ): Promise<ActionResult> {
@@ -37,7 +33,6 @@ export async function createAgreement(
 
     const supabase = await createServerSupabase();
 
-    // Verificar que no exista acuerdo previo
     const { data: existing } = await supabase
       .from('legal_fee_agreements')
       .select('id')
@@ -47,11 +42,11 @@ export async function createAgreement(
     if (existing) {
       return {
         success: false,
-        error: 'Este expediente ya tiene un acuerdo de honorarios. Edítalo en su lugar.',
+        error:
+          'Este expediente ya tiene un acuerdo de honorarios. Edítalo en su lugar.',
       };
     }
 
-    // Crear el acuerdo
     const { data: agreement, error: agreementError } = await supabase
       .from('legal_fee_agreements')
       .insert({
@@ -78,7 +73,6 @@ export async function createAgreement(
       };
     }
 
-    // Insertar cuotas si aplica
     if (
       parsed.data.modalidad !== 'UNICO' &&
       parsed.data.installments &&
@@ -99,7 +93,6 @@ export async function createAgreement(
         .insert(installmentsData);
 
       if (instError) {
-        // Rollback manual
         await supabase.from('legal_fee_agreements').delete().eq('id', agreement.id);
         console.error('Error creating installments:', instError);
         return {
@@ -122,10 +115,10 @@ export async function createAgreement(
   }
 }
 
-/**
- * Actualiza un acuerdo existente.
- * Estrategia: borra las cuotas antiguas y crea nuevas (siempre que no tengan pagos).
- */
+// ============================================================
+// ACTUALIZAR ACUERDO
+// ============================================================
+
 export async function updateAgreement(
   agreementId: string,
   input: CreateAgreementInput
@@ -143,7 +136,6 @@ export async function updateAgreement(
 
     const supabase = await createServerSupabase();
 
-    // Verificar que no hay pagos asociados a cuotas
     const { data: paymentsLinked } = await supabase
       .from('legal_payments')
       .select('id')
@@ -161,7 +153,6 @@ export async function updateAgreement(
       };
     }
 
-    // Actualizar el acuerdo
     const { error: updateError } = await supabase
       .from('legal_fee_agreements')
       .update({
@@ -181,13 +172,11 @@ export async function updateAgreement(
       return { success: false, error: 'No se pudo actualizar el acuerdo' };
     }
 
-    // Borrar cuotas anteriores
     await supabase
       .from('legal_fee_installments')
       .delete()
       .eq('agreement_id', agreementId);
 
-    // Crear cuotas nuevas si aplica
     if (
       parsed.data.modalidad !== 'UNICO' &&
       parsed.data.installments &&
@@ -209,7 +198,10 @@ export async function updateAgreement(
 
       if (instError) {
         console.error('Error updating installments:', instError);
-        return { success: false, error: 'No se pudieron actualizar las cuotas' };
+        return {
+          success: false,
+          error: 'No se pudieron actualizar las cuotas',
+        };
       }
     }
 
@@ -225,9 +217,10 @@ export async function updateAgreement(
   }
 }
 
-/**
- * Eliminar acuerdo (solo si no tiene pagos).
- */
+// ============================================================
+// ELIMINAR ACUERDO
+// ============================================================
+
 export async function deleteAgreement(
   agreementId: string
 ): Promise<ActionResult> {
@@ -235,7 +228,6 @@ export async function deleteAgreement(
     await requireVertical('legal');
     const supabase = await createServerSupabase();
 
-    // Obtener case_id antes de borrar
     const { data: agreement } = await supabase
       .from('legal_fee_agreements')
       .select('case_id')
@@ -246,7 +238,6 @@ export async function deleteAgreement(
       return { success: false, error: 'Acuerdo no encontrado' };
     }
 
-    // Verificar que no hay pagos
     const { count } = await supabase
       .from('legal_payments')
       .select('id', { count: 'exact', head: true })
@@ -259,7 +250,6 @@ export async function deleteAgreement(
       };
     }
 
-    // Borrar (CASCADE se encarga de las cuotas)
     const { error } = await supabase
       .from('legal_fee_agreements')
       .delete()
@@ -279,13 +269,9 @@ export async function deleteAgreement(
 }
 
 // ============================================================
-// LECTURA: obtener acuerdo con cuotas y stats
+// OBTENER ACUERDO POR EXPEDIENTE
 // ============================================================
 
-/**
- * Obtiene el acuerdo de honorarios de un expediente con sus cuotas
- * y estadísticas calculadas.
- */
 export async function getAgreementByCase(
   caseId: string
 ): Promise<FeeAgreementWithInstallments | null> {
@@ -293,7 +279,6 @@ export async function getAgreementByCase(
     await requireVertical('legal');
     const supabase = await createServerSupabase();
 
-    // Traer el acuerdo
     const { data: agreement } = await supabase
       .from('legal_fee_agreements')
       .select('*')
@@ -302,7 +287,6 @@ export async function getAgreementByCase(
 
     if (!agreement) return null;
 
-    // Traer cuotas
     const { data: installments } = await supabase
       .from('legal_fee_installments')
       .select('*')
@@ -310,8 +294,6 @@ export async function getAgreementByCase(
       .order('numero', { ascending: true });
 
     const installmentsList = (installments as LegalFeeInstallment[]) || [];
-
-    // Calcular stats
     const stats = calculateStats(agreement as LegalFeeAgreement, installmentsList);
 
     return {
@@ -335,14 +317,16 @@ function calculateStats(
 ): AgreementStats {
   const ahora = new Date();
 
-  // Para pago único: el acuerdo mismo es la "cuota"
   if (agreement.modalidad === 'UNICO') {
-    const totalPagado = agreement.estado === 'PAGADO' ? agreement.monto_total : 0;
+    const totalPagado =
+      agreement.estado === 'PAGADO' ? agreement.monto_total : 0;
     return {
       totalPagado,
       totalPendiente: agreement.monto_total - totalPagado,
       porcentajePagado:
-        agreement.monto_total > 0 ? (totalPagado / agreement.monto_total) * 100 : 0,
+        agreement.monto_total > 0
+          ? (totalPagado / agreement.monto_total) * 100
+          : 0,
       cuotasPagadas: agreement.estado === 'PAGADO' ? 1 : 0,
       cuotasPendientes: agreement.estado === 'PAGADO' ? 0 : 1,
       cuotasVencidas: 0,
@@ -350,7 +334,6 @@ function calculateStats(
     };
   }
 
-  // Para CUOTAS y POR_ETAPA
   let totalPagado = 0;
   let cuotasPagadas = 0;
   let cuotasPendientes = 0;
@@ -365,11 +348,13 @@ function calculateStats(
     } else {
       cuotasPendientes++;
       const venc = new Date(inst.fecha_vencimiento);
-      if (venc < ahora && inst.estado !== 'PAGADA') {
+      if (venc < ahora) {
         cuotasVencidas++;
       }
-      // La próxima cuota es la más cercana sin pagar
-      if (!proximaCuota || venc < new Date(proximaCuota.fecha_vencimiento)) {
+      if (
+        !proximaCuota ||
+        venc < new Date(proximaCuota.fecha_vencimiento)
+      ) {
         proximaCuota = inst;
       }
     }
