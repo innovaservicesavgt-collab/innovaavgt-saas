@@ -1,11 +1,19 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Calendar, BookOpen, Paperclip, DollarSign } from 'lucide-react';
+import {
+  FileText,
+  Calendar,
+  BookOpen,
+  Paperclip,
+  DollarSign,
+  History,
+} from 'lucide-react';
 import { CaseHeaderSection } from './case-header-section';
 import { CaseInfoTab } from './case-info-tab';
 import { CaseAgendaTab } from './case-agenda-tab';
 import { CaseDocumentsTab } from './case-documents-tab';
 import { CaseActionsTab } from './case-actions-tab';
 import { CaseFinancesTab } from './case-finances-tab';
+import { AuditCaseHistory } from '@/app/legal/audit/components/audit-case-history';
 import type { LegalCaseWithRelations } from '@/app/legal/cases/types';
 import type { ClientOption } from '@/app/legal/cases/components/client-selector';
 import type {
@@ -71,6 +79,10 @@ export function CaseTabsWrapper({
             <DollarSign className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Honorarios</span>
           </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Historial</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="mt-6">
@@ -94,6 +106,10 @@ export function CaseTabsWrapper({
 
         <TabsContent value="finances" className="mt-6">
           <CaseFinancesTab caseId={caseData.id} />
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-6">
+          <AuditCaseHistory caseId={caseData.id} />
         </TabsContent>
       </Tabs>
     </div>
