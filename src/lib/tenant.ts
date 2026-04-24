@@ -1,13 +1,32 @@
 import { createServerSupabase } from '@/lib/supabase/server';
 import { cache } from 'react';
+import type { VerticalCode } from '@/lib/verticals';
+
+export type TenantPlan = {
+  id: string;
+  code: string;
+  name: string;
+  monthly_price: number;
+  currency: string;
+  /** Features activadas por el plan (JSONB de la tabla plans) */
+  features: Record<string, unknown>;
+};
 
 export type TenantInfo = {
   id: string;
   name: string;
-  vertical: 'dental' | 'legal';
-  business_type: string;
+  vertical: VerticalCode;
+  business_type: string | null;
   slug: string;
   is_active: boolean;
+  // Campos agregados en Sprint 1
+  timezone: string;
+  default_currency: string;
+  default_language: string;
+  brand_name: string | null;
+  brand_logo_url: string | null;
+  brand_primary_color: string | null;
+  plan: TenantPlan | null;
 };
 
 export type ProfileWithTenant = {
@@ -28,66 +47,102 @@ export type ProfileWithTenant = {
 };
 
 /**
- * Devuelve el usuario autenticado con su profile, tenant y rol.
- * Retorna null si no hay sesión o si no tiene profile/tenant.
- * 
- * Usa React cache() para que no haga múltiples queries en el mismo render.
+ * Devuelve el usuario autenticado con profile, tenant y rol.
+ * Usa React cache() para deduplicar queries en el mismo render.
  */
-export const getCurrentProfile = cache(async (): Promise<ProfileWithTenant | null> => {
-  const supabase = await createServerSupabase();
+export const getCurrentProfile = cache(
+  async (): Promise<ProfileWithTenant | null> => {
+    const supabase = await createServerSupabase();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) return null;
+    if (!user) return null;
 
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select(`
-      id,
-      tenant_id,
-      role_id,
-      first_name,
-      last_name,
-      email,
-      is_active,
-      is_superadmin,
-      tenant:tenants (
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select(`
         id,
-        name,
-        vertical,
-        business_type,
-        slug,
-        is_active
-      ),
-      role:roles (
-        id,
-        name,
-        display_name
-      )
-    `)
-    .eq('id', user.id)
-    .single();
+        tenant_id,
+        role_id,
+        first_name,
+        last_name,
+        email,
+        is_active,
+        is_superadmin,
+        tenant:tenants (
+          id,
+          name,
+          vertical,
+          business_type,
+          slug,
+          is_active,
+          timezone,
+          default_currency,
+          default_language,
+          brand_name,
+          brand_logo_url,
+          brand_primary_color,
+          plan:plans (
+            id,
+            code,
+            name,
+            monthly_price,
+            currency,
+            features
+          )
+        ),
+        role:roles (
+          id,
+          name,
+          display_name
+        )
+      `)
+      .eq('id', user.id)
+      .single();
 
-  if (error || !profile) return null;
+    if (error || !profile) return null;
 
-  return profile as unknown as ProfileWithTenant;
-});
+    return profile as unknown as ProfileWithTenant;
+  }
+);
 
-/**
- * Devuelve solo el tenant actual, sin el profile completo.
- * Útil cuando solo necesitas saber el vertical o el nombre del despacho.
- */
-export const getCurrentTenant = cache(async (): Promise<TenantInfo | null> => {
-  const profile = await getCurrentProfile();
-  return profile?.tenant ?? null;
-});
+export const getCurrentTenant = cache(
+  async (): Promise<TenantInfo | null> => {
+    const profile = await getCurrentProfile();
+    return profile?.tenant ?? null;
+  }
+);
 
-/**
- * Devuelve el vertical del tenant actual, o null si no hay sesión.
- */
-export async function getCurrentVertical(): Promise<'dental' | 'legal' | null> {
+export async function getCurrentVertical(): Promise<VerticalCode | null> {
   const tenant = await getCurrentTenant();
   return tenant?.vertical ?? null;
+}
+
+/**
+ * Verifica si el tenant actual tiene una feature activa en su plan.
+ *
+ * Uso en Server Components:
+ *   if (await hasFeature('odontogram')) { ... }
+ *
+ * Uso en Client Components:
+ *   Pasa las features desde un Server Component via props.
+ */
+export async function hasFeature(feature: string): Promise<boolean> {
+  const tenant = await getCurrentTenant();
+  if (!tenant?.plan?.features) return false;
+  return tenant.plan.features[feature] === true;
+}
+
+/**
+ * Versión sincrónica para Client Components que ya recibieron
+ * el objeto de features como prop.
+ */
+export function hasFeatureSync(
+  features: Record<string, unknown> | null | undefined,
+  feature: string
+): boolean {
+  if (!features) return false;
+  return features[feature] === true;
 }
