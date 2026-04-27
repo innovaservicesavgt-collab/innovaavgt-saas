@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/select';
 import { Search, ChevronRight, Receipt, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { formatMoney } from '@/app/legal/finances/constants';
-import type { ReceivableItem } from '@/app/legal/finances/types';
+import { formatMoney } from '@/app/(legal)/legal/finances/constants';
+import type { ReceivableItem } from '@/app/(legal)/legal/finances/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -160,7 +160,7 @@ export function ReceivablesTable({ items }: Props) {
                               : 'bg-amber-100 text-amber-700'
                           )}
                         >
-                          {item.diasVencido} días vencido
+                          {item.diasVencido} dÃ­as vencido
                         </Badge>
                       )}
                       {item.type === 'expense' && (
@@ -178,13 +178,13 @@ export function ReceivablesTable({ items }: Props) {
                       </span>
                       {item.clientName && (
                         <>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span className="truncate">{item.clientName}</span>
                         </>
                       )}
                       {item.fechaVencimiento && (
                         <>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>
                             Vence:{' '}
                             {format(new Date(item.fechaVencimiento), 'd MMM yyyy', {

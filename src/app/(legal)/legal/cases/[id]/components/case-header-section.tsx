@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { CaseDetailHeader } from './case-detail-header';
-import { CaseFormDialog } from '@/app/legal/cases/components/case-form-dialog';
-import type { LegalCaseWithRelations } from '@/app/legal/cases/types';
-import type { ClientOption } from '@/app/legal/cases/components/client-selector';
+import { CaseFormDialog } from '@/app/(legal)/legal/cases/components/case-form-dialog';
+import type { LegalCaseWithRelations } from '@/app/(legal)/legal/cases/types';
+import type { ClientOption } from '@/app/(legal)/legal/cases/components/client-selector';
 import type {
   CatalogJuzgado,
   CatalogFiscalia,
   CatalogTipoProceso,
-} from '@/app/legal/catalogs/types';
+} from '@/app/(legal)/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;
@@ -28,8 +28,8 @@ type Props = {
 };
 
 /**
- * Sección cliente del detalle de expediente.
- * Maneja el header + modal de edición.
+ * SecciÃ³n cliente del detalle de expediente.
+ * Maneja el header + modal de ediciÃ³n.
  */
 export function CaseHeaderSection({
   caseData,

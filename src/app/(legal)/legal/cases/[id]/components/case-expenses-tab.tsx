@@ -1,11 +1,11 @@
 import {
   getExpensesByCase,
   getTiposGasto,
-} from '@/app/legal/finances/expense-actions';
-import { calculateExpenseStats } from '@/app/legal/finances/expense-utils';
-import { getAgreementByCase } from '@/app/legal/finances/actions';
+} from '@/app/(legal)/legal/finances/expense-actions';
+import { calculateExpenseStats } from '@/app/(legal)/legal/finances/expense-utils';
+import { getAgreementByCase } from '@/app/(legal)/legal/finances/actions';
 import { ExpensesList } from './expenses-list';
-import type { Moneda } from '@/app/legal/finances/constants';
+import type { Moneda } from '@/app/(legal)/legal/finances/constants';
 
 type Props = {
   caseId: string;

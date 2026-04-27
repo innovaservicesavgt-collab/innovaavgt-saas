@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, Calendar, AlertCircle, Users } from 'lucide-react';
 import { getCurrentProfile } from '@/lib/tenant';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { getFinancesDashboardData } from '@/app/legal/finances/dashboard-actions';
+import { getFinancesDashboardData } from '@/app/(legal)/legal/finances/dashboard-actions';
 import { FinancesMiniWidget } from './components/finances-mini-widget';
 
 export default async function LegalDashboardPage() {
@@ -25,7 +25,7 @@ export default async function LegalDashboardPage() {
     59
   ).toISOString();
 
-  // Rango de "próximos 3 días"
+  // Rango de "prÃ³ximos 3 dÃ­as"
   const finUrgentes = new Date(
     hoy.getFullYear(),
     hoy.getMonth(),
@@ -81,7 +81,7 @@ export default async function LegalDashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900">
           Bienvenido, {profile?.first_name}
         </h1>
-        <p className="text-gray-600 mt-1">Panel principal del módulo jurídico</p>
+        <p className="text-gray-600 mt-1">Panel principal del mÃ³dulo jurÃ­dico</p>
       </div>
 
       {/* Stats cards */}
@@ -114,7 +114,7 @@ export default async function LegalDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{expedientesActivos}</div>
-            <p className="text-xs text-gray-500 mt-1">En trámite</p>
+            <p className="text-xs text-gray-500 mt-1">En trÃ¡mite</p>
           </CardContent>
         </Card>
 
@@ -127,7 +127,7 @@ export default async function LegalDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{plazosUrgentes}</div>
-            <p className="text-xs text-gray-500 mt-1">Próximos 3 días</p>
+            <p className="text-xs text-gray-500 mt-1">PrÃ³ximos 3 dÃ­as</p>
           </CardContent>
         </Card>
 
@@ -149,16 +149,16 @@ export default async function LegalDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Bienvenido al módulo jurídico</CardTitle>
+            <CardTitle>Bienvenido al mÃ³dulo jurÃ­dico</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Este es tu centro de control para la gestión integral del despacho.
-              Desde aquí puedes administrar expedientes, audiencias, clientes,
-              documentos y más.
+              Este es tu centro de control para la gestiÃ³n integral del despacho.
+              Desde aquÃ­ puedes administrar expedientes, audiencias, clientes,
+              documentos y mÃ¡s.
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              Empieza creando tu primer cliente o expediente desde el menú
+              Empieza creando tu primer cliente o expediente desde el menÃº
               lateral.
             </p>
           </CardContent>

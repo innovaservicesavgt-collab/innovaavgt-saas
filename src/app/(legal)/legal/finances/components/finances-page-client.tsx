@@ -3,11 +3,11 @@ import { OverdueInstallmentsList } from './overdue-installments-list';
 import { ReceivablesTable } from './receivables-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-import { formatMoney } from '@/app/legal/finances/constants';
+import { formatMoney } from '@/app/(legal)/legal/finances/constants';
 import type {
   FinancesDashboardData,
   ReceivableItem,
-} from '@/app/legal/finances/types';
+} from '@/app/(legal)/legal/finances/types';
 
 type Props = {
   data: FinancesDashboardData;
@@ -53,8 +53,8 @@ export function FinancesPageClient({ data, receivables }: Props) {
                         {d.clientName}
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">
-                        {d.cantidadItems} item(s) • {Math.round(d.diasVencidoPromedio)}{' '}
-                        días promedio
+                        {d.cantidadItems} item(s) â€¢ {Math.round(d.diasVencidoPromedio)}{' '}
+                        dÃ­as promedio
                       </div>
                     </div>
                     <div className="text-right shrink-0">

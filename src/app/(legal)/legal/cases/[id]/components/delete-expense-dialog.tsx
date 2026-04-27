@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
-import { deleteExpense } from '@/app/legal/finances/expense-actions';
+import { deleteExpense } from '@/app/(legal)/legal/finances/expense-actions';
 import { toast } from 'sonner';
 
 type Props = {
@@ -44,11 +44,11 @@ export function DeleteExpenseDialog({ open, onOpenChange, expenseId }: Props) {
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
-            <DialogTitle>¿Eliminar gasto?</DialogTitle>
+            <DialogTitle>Â¿Eliminar gasto?</DialogTitle>
           </div>
           <DialogDescription className="pt-2">
-            El gasto se eliminará permanentemente del expediente. 
-            Esta acción no se puede deshacer.
+            El gasto se eliminarÃ¡ permanentemente del expediente. 
+            Esta acciÃ³n no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +65,7 @@ export function DeleteExpenseDialog({ open, onOpenChange, expenseId }: Props) {
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? 'Eliminando...' : 'Sí, eliminar'}
+            {isPending ? 'Eliminando...' : 'SÃ­, eliminar'}
           </Button>
         </DialogFooter>
       </DialogContent>

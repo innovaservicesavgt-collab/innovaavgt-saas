@@ -2,12 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LegalFeeInstallment } from '@/app/legal/finances/types';
+import { LegalFeeInstallment } from '@/app/(legal)/legal/finances/types';
 import {
   formatMoney,
   getEstadoCuotaInfo,
   Moneda,
-} from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/constants';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';

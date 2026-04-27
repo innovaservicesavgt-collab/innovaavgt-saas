@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth/guards';
+﻿import { requireAuth } from '@/lib/auth/guards';
 import { createServerSupabase } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { InlineStatusButton } from '@/components/appointments/inline-status';
@@ -201,10 +201,10 @@ export default async function DashboardPage() {
       {/* Quick actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
-          { label: 'Nueva cita', href: '/appointments/new', color: 'bg-blue-600 hover:bg-blue-700 text-white', icon: 'M12 4v16m8-8H4' },
-          { label: 'Nuevo paciente', href: '/patients/new', color: 'bg-emerald-600 hover:bg-emerald-700 text-white', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
-          { label: 'Cotizar', href: '/quotations/new', color: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200', icon: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
-          { label: 'Calendario', href: '/calendar', color: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200', icon: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25' },
+          { label: 'Nueva cita', href: '/dental/appointments/new', color: 'bg-blue-600 hover:bg-blue-700 text-white', icon: 'M12 4v16m8-8H4' },
+          { label: 'Nuevo paciente', href: '/dental/patients/new', color: 'bg-emerald-600 hover:bg-emerald-700 text-white', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
+          { label: 'Cotizar', href: '/dental/quotations/new', color: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200', icon: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
+          { label: 'Calendario', href: '/dental/calendar', color: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200', icon: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25' },
         ].map((a) => (
           <Link key={a.href} href={a.href} className={"flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all " + a.color}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d={a.icon} /></svg>
@@ -258,13 +258,13 @@ export default async function DashboardPage() {
             <h3 className="font-semibold text-slate-800">Agenda de hoy</h3>
             <p className="text-xs text-slate-400 mt-0.5">{today} · {todayAppts?.length || 0} citas</p>
           </div>
-          <Link href="/appointments" className="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todas</Link>
+          <Link href="/dental/appointments" className="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todas</Link>
         </div>
         {(!todayAppts || todayAppts.length === 0) ? (
           <div className="p-8 text-center text-slate-400">
             <svg className="w-12 h-12 mx-auto mb-3 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             <p className="font-medium text-slate-500">No hay citas hoy</p>
-            <Link href="/appointments/new" className="text-sm text-blue-600 hover:underline mt-1 inline-block">Agendar cita</Link>
+            <Link href="/dental/appointments/new" className="text-sm text-blue-600 hover:underline mt-1 inline-block">Agendar cita</Link>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -283,7 +283,7 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   {/* Patient */}
-                  <Link href={'/appointments/' + apt.id} className="flex-1 min-w-0">
+                  <Link href={'/dental/appointments/' + apt.id} className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-800 truncate">{(apt.patients as any)?.first_name} {(apt.patients as any)?.last_name}</p>
                     <p className="text-xs text-slate-400 truncate">{(apt.professionals as any)?.title} {(apt.professionals as any)?.first_name} · {(apt.services as any)?.name || 'Consulta'}</p>
                   </Link>

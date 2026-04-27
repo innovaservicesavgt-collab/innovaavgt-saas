@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, ChevronRight, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
-import { formatMoney } from '@/app/legal/finances/constants';
-import type { FinancesDashboardData } from '@/app/legal/finances/types';
+import { formatMoney } from '@/app/(legal)/legal/finances/constants';
+import type { FinancesDashboardData } from '@/app/(legal)/legal/finances/types';
 
 type Props = {
   data: FinancesDashboardData;
@@ -68,7 +68,7 @@ export function FinancesMiniWidget({ data }: Props) {
 
         {!hayCobrado && data.totalPorCobrarGTQ === 0 && (
           <div className="text-center text-xs text-gray-500 py-2">
-            Sin actividad financiera aún
+            Sin actividad financiera aÃºn
           </div>
         )}
       </CardContent>

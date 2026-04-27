@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth/guards';
+﻿import { requireAuth } from '@/lib/auth/guards';
 import { createServerSupabase } from '@/lib/supabase/server';
 import Link from 'next/link';
 
@@ -11,7 +11,7 @@ export default async function ProfessionalsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{profs?.length || 0} profesionales</p>
-        <Link href="/professionals/new" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+        <Link href="/dental/professionals/new" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           Nuevo profesional
         </Link>
@@ -20,7 +20,7 @@ export default async function ProfessionalsPage() {
         {(!profs || profs.length === 0) ? (
           <div className="col-span-full bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">
             <p className="text-lg font-medium text-slate-500">No hay profesionales</p>
-            <Link href="/professionals/new" className="text-sm text-blue-600 hover:underline mt-2 inline-block">Agregar primero</Link>
+            <Link href="/dental/professionals/new" className="text-sm text-blue-600 hover:underline mt-2 inline-block">Agregar primero</Link>
           </div>
         ) : profs.map((p: any) => (
           <div key={p.id} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">

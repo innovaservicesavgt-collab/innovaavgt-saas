@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -48,14 +48,14 @@ export default function NewQuotationPage() {
       const res = await fetch('/api/quotations', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ patient_id: patientId || null, items, discount_percent: discount, discount_amount: discountAmount, subtotal, total, notes })
       });
-      if (res.ok) { router.push('/quotations'); router.refresh(); }
+      if (res.ok) { router.push('/dental/quotations'); router.refresh(); }
     } catch {} finally { setLoading(false); }
   };
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       <div className="flex items-center gap-3">
-        <Link href="/quotations" className="text-slate-400 hover:text-slate-600"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg></Link>
+        <Link href="/dental/quotations" className="text-slate-400 hover:text-slate-600"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg></Link>
         <h2 className="text-xl font-bold text-slate-800">Nueva cotizacion</h2>
       </div>
 
@@ -119,7 +119,7 @@ export default function NewQuotationPage() {
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Link href="/quotations" className="flex-1 py-2.5 text-center bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200">Cancelar</Link>
+          <Link href="/dental/quotations" className="flex-1 py-2.5 text-center bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200">Cancelar</Link>
           <button onClick={handleSubmit} disabled={loading || items.length === 0} className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">{loading ? 'Guardando...' : 'Guardar cotizacion'}</button>
         </div>
       </div>

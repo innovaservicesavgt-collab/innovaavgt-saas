@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -38,7 +38,7 @@ export function CalendarView({ appointments }: Props) {
           <h3 className="text-lg font-bold text-slate-800">{monthNames[month]} {year}</h3>
           <button onClick={next} className="p-2 hover:bg-slate-100 rounded-lg"><svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg></button>
         </div>
-        <Link href="/appointments/new" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">+ Nueva cita</Link>
+        <Link href="/dental/appointments/new" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">+ Nueva cita</Link>
       </div>
 
       {/* Calendar grid */}
@@ -58,7 +58,7 @@ export function CalendarView({ appointments }: Props) {
                 <p className={"text-xs font-medium mb-1 " + (isToday ? "text-blue-600 font-bold" : "text-slate-500")}>{day}</p>
                 <div className="space-y-0.5">
                   {appts.slice(0, 3).map((a: any) => (
-                    <Link key={a.id} href={'/appointments/' + a.id}
+                    <Link key={a.id} href={'/dental/appointments/' + a.id}
                       className="block px-1.5 py-0.5 rounded text-xs truncate hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: ((a.professionals as any)?.color || '#3b82f6') + '20', color: (a.professionals as any)?.color || '#3b82f6' }}>
                       <span className="font-medium">{a.start_time?.slice(0,5)}</span>

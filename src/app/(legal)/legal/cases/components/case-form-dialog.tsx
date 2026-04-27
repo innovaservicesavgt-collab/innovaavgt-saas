@@ -36,15 +36,15 @@ import {
 } from '../constants';
 import { ClientSelector, ClientOption } from './client-selector';
 
-// NUEVOS IMPORTS — Catálogos Fase 12
-import { JuzgadoCombobox } from '@/app/legal/catalogs/components/juzgado-combobox';
-import { FiscaliaCombobox } from '@/app/legal/catalogs/components/fiscalia-combobox';
-import { TipoProcesoCombobox } from '@/app/legal/catalogs/components/tipo-proceso-combobox';
+// NUEVOS IMPORTS â€” CatÃ¡logos Fase 12
+import { JuzgadoCombobox } from '@/app/(legal)/legal/catalogs/components/juzgado-combobox';
+import { FiscaliaCombobox } from '@/app/(legal)/legal/catalogs/components/fiscalia-combobox';
+import { TipoProcesoCombobox } from '@/app/(legal)/legal/catalogs/components/tipo-proceso-combobox';
 import type {
   CatalogJuzgado,
   CatalogFiscalia,
   CatalogTipoProceso,
-} from '@/app/legal/catalogs/types';
+} from '@/app/(legal)/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;
@@ -64,7 +64,7 @@ type Props = {
   tiposProceso: CatalogTipoProceso[];
 };
 
-// Mapeo materia legal_cases -> materia catálogos
+// Mapeo materia legal_cases -> materia catÃ¡logos
 // Algunos valores cambian de nombre entre las dos enums
 function mapMateriaACatalogo(materia: Materia): string {
   const mapa: Record<string, string> = {
@@ -72,7 +72,7 @@ function mapMateriaACatalogo(materia: Materia): string {
     CIVIL: 'CIVIL',
     LABORAL: 'LABORAL',
     ADMINISTRATIVO: 'ADMINISTRATIVO',
-    NOTARIAL: 'CIVIL', // Notarial se maneja como civil en el catálogo
+    NOTARIAL: 'CIVIL', // Notarial se maneja como civil en el catÃ¡logo
     FAMILIA: 'FAMILIA',
     MERCANTIL: 'MERCANTIL',
     OTROS: '', // sin filtro
@@ -201,18 +201,18 @@ export function CaseFormDialog({
           <DialogDescription>
             {isEditing
               ? 'Modifica los datos del expediente'
-              : 'El número interno se genera automáticamente al guardar'}
+              : 'El nÃºmero interno se genera automÃ¡ticamente al guardar'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* ============================================================ */}
-          {/* SECCIÓN 1: INFORMACIÓN GENERAL */}
+          {/* SECCIÃ“N 1: INFORMACIÃ“N GENERAL */}
           {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <FileText className="w-4 h-4" />
-              Información general
+              InformaciÃ³n general
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,9 +265,9 @@ export function CaseFormDialog({
                 </Select>
               </div>
 
-              {/* Número judicial */}
+              {/* NÃºmero judicial */}
               <div className="space-y-2">
-                <Label htmlFor="numero_judicial">Número judicial</Label>
+                <Label htmlFor="numero_judicial">NÃºmero judicial</Label>
                 <Input
                   id="numero_judicial"
                   {...register('numero_judicial')}
@@ -300,12 +300,12 @@ export function CaseFormDialog({
           <Separator />
 
           {/* ============================================================ */}
-          {/* SECCIÓN 2: ÓRGANO JURISDICCIONAL Y PROCESO (NUEVO FASE 12) */}
+          {/* SECCIÃ“N 2: Ã“RGANO JURISDICCIONAL Y PROCESO (NUEVO FASE 12) */}
           {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <Landmark className="w-4 h-4" />
-              Órgano jurisdiccional y proceso
+              Ã“rgano jurisdiccional y proceso
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -324,7 +324,7 @@ export function CaseFormDialog({
                   }
                 />
                 <p className="text-xs text-gray-500">
-                  Filtrado automáticamente por materia seleccionada
+                  Filtrado automÃ¡ticamente por materia seleccionada
                 </p>
               </div>
 
@@ -343,18 +343,18 @@ export function CaseFormDialog({
                 </p>
               </div>
 
-              {/* Fiscalía — solo si es penal */}
+              {/* FiscalÃ­a â€” solo si es penal */}
               {esPenal && (
                 <div className="space-y-2">
-                  <Label>Fiscalía del MP</Label>
+                  <Label>FiscalÃ­a del MP</Label>
                   <FiscaliaCombobox
                     fiscalias={fiscalias}
                     value={fiscaliaActual}
                     onChange={(val) => setValue('fiscalia_id', val ?? '')}
-                    placeholder="Buscar fiscalía..."
+                    placeholder="Buscar fiscalÃ­a..."
                   />
                   <p className="text-xs text-gray-500">
-                    Fiscalía del Ministerio Público encargada del caso
+                    FiscalÃ­a del Ministerio PÃºblico encargada del caso
                   </p>
                 </div>
               )}
@@ -364,7 +364,7 @@ export function CaseFormDialog({
           <Separator />
 
           {/* ============================================================ */}
-          {/* SECCIÓN 3: PARTES DEL PROCESO */}
+          {/* SECCIÃ“N 3: PARTES DEL PROCESO */}
           {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
@@ -411,7 +411,7 @@ export function CaseFormDialog({
           <Separator />
 
           {/* ============================================================ */}
-          {/* SECCIÓN 4: RESPONSABLE Y SEGUIMIENTO */}
+          {/* SECCIÃ“N 4: RESPONSABLE Y SEGUIMIENTO */}
           {/* ============================================================ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
@@ -453,9 +453,9 @@ export function CaseFormDialog({
                 )}
               </div>
 
-              {/* Próxima actuación */}
+              {/* PrÃ³xima actuaciÃ³n */}
               <div className="space-y-2">
-                <Label htmlFor="proxima_actuacion">Próxima actuación</Label>
+                <Label htmlFor="proxima_actuacion">PrÃ³xima actuaciÃ³n</Label>
                 <Input
                   id="proxima_actuacion"
                   type="date"
@@ -466,7 +466,7 @@ export function CaseFormDialog({
 
             {/* Observaciones */}
             <div className="space-y-2">
-              <Label htmlFor="observaciones">Observaciones estratégicas</Label>
+              <Label htmlFor="observaciones">Observaciones estratÃ©gicas</Label>
               <Textarea
                 id="observaciones"
                 {...register('observaciones')}

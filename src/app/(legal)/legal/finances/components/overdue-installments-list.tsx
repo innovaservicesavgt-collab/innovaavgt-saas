@@ -2,8 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { formatMoney } from '@/app/legal/finances/constants';
-import type { ReceivableItem } from '@/app/legal/finances/types';
+import { formatMoney } from '@/app/(legal)/legal/finances/constants';
+import type { ReceivableItem } from '@/app/(legal)/legal/finances/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -27,14 +27,14 @@ export function OverdueInstallmentsList({ items }: Props) {
             Cuotas vencidas
           </CardTitle>
           {vencidos.length > 10 && (
-            <span className="text-xs text-gray-500">Mostrando 10 más críticas</span>
+            <span className="text-xs text-gray-500">Mostrando 10 mÃ¡s crÃ­ticas</span>
           )}
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
         {vencidos.length === 0 ? (
           <div className="text-center py-8 text-sm text-gray-500">
-            ✅ No hay cuotas vencidas
+            âœ… No hay cuotas vencidas
           </div>
         ) : (
           vencidos.map((item) => (
@@ -65,7 +65,7 @@ export function OverdueInstallmentsList({ items }: Props) {
                             : 'bg-amber-100 text-amber-700'
                         )}
                       >
-                        {item.diasVencido} día{item.diasVencido !== 1 && 's'} vencido
+                        {item.diasVencido} dÃ­a{item.diasVencido !== 1 && 's'} vencido
                       </Badge>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-gray-600 flex-wrap">
@@ -74,15 +74,15 @@ export function OverdueInstallmentsList({ items }: Props) {
                       </span>
                       {item.clientName && (
                         <>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span className="truncate">{item.clientName}</span>
                         </>
                       )}
                       {item.fechaVencimiento && (
                         <>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>
-                            Venció:{' '}
+                            VenciÃ³:{' '}
                             {format(new Date(item.fechaVencimiento), 'd MMM yyyy', {
                               locale: es,
                             })}

@@ -1,13 +1,13 @@
-'use client';
+﻿'use client';
 import { usePathname } from 'next/navigation';
 
 const titles: Record<string, string> = {
-  '/dashboard': 'Dashboard', '/calendar': 'Calendario', '/appointments': 'Citas',
-  '/appointments/new': 'Nueva cita', '/patients': 'Pacientes', '/patients/new': 'Nuevo paciente',
-  '/professionals': 'Profesionales', '/professionals/new': 'Nuevo profesional',
-  '/services': 'Servicios', '/services/new': 'Nuevo servicio',
-  '/quotations': 'Cotizaciones', '/quotations/new': 'Nueva cotizacion',
-  '/settings': 'Configuracion',
+  '/dental/dashboard': 'Dashboard', '/dental/calendar': 'Calendario', '/dental/appointments': 'Citas',
+  '/dental/appointments/new': 'Nueva cita', '/dental/patients': 'Pacientes', '/dental/patients/new': 'Nuevo paciente',
+  '/dental/professionals': 'Profesionales', '/dental/professionals/new': 'Nuevo profesional',
+  '/dental/services': 'Servicios', '/dental/services/new': 'Nuevo servicio',
+  '/dental/quotations': 'Cotizaciones', '/dental/quotations/new': 'Nueva cotizacion',
+  '/dental/settings': 'Configuracion',
 };
 
 interface HeaderBarProps { user: { name: string; role: string } }

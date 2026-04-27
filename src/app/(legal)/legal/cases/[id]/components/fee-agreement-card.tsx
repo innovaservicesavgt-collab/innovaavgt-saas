@@ -19,19 +19,19 @@ import {
   FileText,
   Plus,
 } from 'lucide-react';
-import { FeeAgreementWithInstallments } from '@/app/legal/finances/types';
+import { FeeAgreementWithInstallments } from '@/app/(legal)/legal/finances/types';
 import {
   formatMoney,
   getModalidadInfo,
   getEstadoAcuerdoInfo,
-} from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/constants';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { FeeAgreementDialog } from './fee-agreement-dialog';
 import { FeeInstallmentsList } from './fee-installments-list';
 import { PaymentDialog } from './payment-dialog';
-import { deleteAgreement } from '@/app/legal/finances/actions';
+import { deleteAgreement } from '@/app/(legal)/legal/finances/actions';
 import { toast } from 'sonner';
 
 type Props = {
@@ -52,7 +52,7 @@ export function FeeAgreementCard({ agreement, caseId }: Props) {
   const handleDelete = () => {
     if (
       !confirm(
-        '¿Eliminar este acuerdo de honorarios? Esta acción no se puede deshacer.'
+        'Â¿Eliminar este acuerdo de honorarios? Esta acciÃ³n no se puede deshacer.'
       )
     )
       return;
@@ -182,13 +182,13 @@ export function FeeAgreementCard({ agreement, caseId }: Props) {
               )}
             </div>
 
-            {/* Próxima cuota */}
+            {/* PrÃ³xima cuota */}
             {agreement.stats.proximaCuota && (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Calendar className="w-4 h-4 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">
-                    Próxima cuota
+                    PrÃ³xima cuota
                   </span>
                 </div>
                 <div className="flex items-center justify-between flex-wrap gap-2">
@@ -197,7 +197,7 @@ export function FeeAgreementCard({ agreement, caseId }: Props) {
                       Cuota #{agreement.stats.proximaCuota.numero}
                       {agreement.stats.proximaCuota.concepto && (
                         <span className="font-normal text-gray-600 ml-2">
-                          — {agreement.stats.proximaCuota.concepto}
+                          â€” {agreement.stats.proximaCuota.concepto}
                         </span>
                       )}
                     </div>
@@ -240,7 +240,7 @@ export function FeeAgreementCard({ agreement, caseId }: Props) {
           )}
       </div>
 
-      {/* ===== MODAL DE EDICIÓN ===== */}
+      {/* ===== MODAL DE EDICIÃ“N ===== */}
       <FeeAgreementDialog
         open={editOpen}
         onOpenChange={setEditOpen}

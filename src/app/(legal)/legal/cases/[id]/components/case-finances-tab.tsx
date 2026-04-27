@@ -1,5 +1,5 @@
-import { getAgreementByCase } from '@/app/legal/finances/actions';
-import { getPaymentsByCase } from '@/app/legal/finances/payment-actions';
+import { getAgreementByCase } from '@/app/(legal)/legal/finances/actions';
+import { getPaymentsByCase } from '@/app/(legal)/legal/finances/payment-actions';
 import { FeeAgreementCard } from './fee-agreement-card';
 import { FeeAgreementEmpty } from './fee-agreement-empty';
 import { PaymentsList } from './payments-list';

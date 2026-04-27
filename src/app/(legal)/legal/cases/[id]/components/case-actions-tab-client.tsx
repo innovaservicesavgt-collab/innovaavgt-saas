@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
-import { ActionsTimeline } from '@/app/legal/actions/components/actions-timeline';
-import { ActionFormDialog } from '@/app/legal/actions/components/action-form-dialog';
-import { LegalActionWithRelations } from '@/app/legal/actions/types';
+import { ActionsTimeline } from '@/app/(legal)/legal/actions/components/actions-timeline';
+import { ActionFormDialog } from '@/app/(legal)/legal/actions/components/action-form-dialog';
+import { LegalActionWithRelations } from '@/app/(legal)/legal/actions/types';
 
 type CaseOption = {
   id: string;
@@ -57,17 +57,17 @@ export function CaseActionsTabClient({ actions, cases, caseId }: Props) {
         <Card>
           <CardContent className="py-4">
             <div className="text-2xl font-bold text-emerald-600">{totalAuto}</div>
-            <div className="text-xs text-gray-500">Automáticas</div>
+            <div className="text-xs text-gray-500">AutomÃ¡ticas</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Botón crear */}
+      {/* BotÃ³n crear */}
       <div className="flex items-center justify-between">
         <h3 className="font-medium text-gray-900">Historial del expediente</h3>
         <Button onClick={handleNew} size="sm">
           <Plus className="w-4 h-4 mr-2" />
-          Nueva actuación
+          Nueva actuaciÃ³n
         </Button>
       </div>
 

@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { getCurrentProfile } from '@/lib/tenant';
 
 /**
@@ -31,9 +31,9 @@ export async function requireVertical(vertical: 'dental' | 'legal') {
 
   // Vertical incorrecto → redirige al dashboard del vertical correcto
   if (profile.tenant.vertical !== vertical) {
-    const correctPath = profile.tenant.vertical === 'legal' 
-      ? '/legal/dashboard' 
-      : '/dashboard';
+    const correctPath = profile.tenant.vertical === 'legal'
+  ? '/legal/dashboard'
+  : '/dental/dashboard';
     redirect(correctPath);
   }
 

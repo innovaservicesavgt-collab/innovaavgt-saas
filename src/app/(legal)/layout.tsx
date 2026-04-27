@@ -1,6 +1,6 @@
 import { requireVertical } from '@/lib/vertical';
-import { LegalSidebar } from './components/sidebar';
-import { LegalHeader } from './components/header';
+import { LegalSidebar } from './legal/components/sidebar';
+import { LegalHeader } from './legal/components/header';
 import { Toaster } from '@/components/ui/sonner';
 
 export default async function LegalLayout({

@@ -1,6 +1,6 @@
 import { createServerSupabase } from '@/lib/supabase/server';
 import { DocumentsTabClient } from './documents-tab-client';
-import { LegalDocumentWithCase } from '@/app/legal/documents/types';
+import { LegalDocumentWithCase } from '@/app/(legal)/legal/documents/types';
 
 type Props = {
   caseId: string;

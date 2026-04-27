@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
-import { deletePayment } from '@/app/legal/finances/payment-actions';
+import { deletePayment } from '@/app/(legal)/legal/finances/payment-actions';
 import { toast } from 'sonner';
 
 type Props = {
@@ -44,11 +44,11 @@ export function DeletePaymentDialog({ open, onOpenChange, paymentId }: Props) {
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
-            <DialogTitle>¿Eliminar pago?</DialogTitle>
+            <DialogTitle>Â¿Eliminar pago?</DialogTitle>
           </div>
           <DialogDescription className="pt-2">
-            El pago se eliminará permanentemente y se recalcularán los saldos.
-            Esta acción no se puede deshacer.
+            El pago se eliminarÃ¡ permanentemente y se recalcularÃ¡n los saldos.
+            Esta acciÃ³n no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +65,7 @@ export function DeletePaymentDialog({ open, onOpenChange, paymentId }: Props) {
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? 'Eliminando...' : 'Sí, eliminar'}
+            {isPending ? 'Eliminando...' : 'SÃ­, eliminar'}
           </Button>
         </DialogFooter>
       </DialogContent>

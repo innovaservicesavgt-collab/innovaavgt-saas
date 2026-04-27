@@ -1,6 +1,6 @@
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CaseActionsTabClient } from './case-actions-tab-client';
-import { LegalActionWithRelations } from '@/app/legal/actions/types';
+import { LegalActionWithRelations } from '@/app/(legal)/legal/actions/types';
 
 type Props = {
   caseId: string;

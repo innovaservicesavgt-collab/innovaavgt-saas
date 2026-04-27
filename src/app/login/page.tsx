@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       // Detectar vertical del tenant para redirigir al dashboard correcto
       const userId = authData.user?.id;
-      let redirectPath = '/dashboard'; // default al dental
+      let redirectPath = '/dental/dashboard'; // default al dental
 
       if (userId) {
         const { data: profile } = await supabase

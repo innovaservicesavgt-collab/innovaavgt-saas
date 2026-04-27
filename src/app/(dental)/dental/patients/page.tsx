@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth/guards';
+﻿import { requireAuth } from '@/lib/auth/guards';
 import { createServerSupabase } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { PatientSearch } from '@/components/patients/patient-search';
@@ -18,7 +18,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <PatientSearch currentQuery={q} />
-        <Link href="/patients/new" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+        <Link href="/dental/patients/new" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           Nuevo paciente
         </Link>
@@ -33,7 +33,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
               let age = '';
               if (p.date_of_birth) { const t = new Date(); const b = new Date(p.date_of_birth); let y = t.getFullYear()-b.getFullYear(); if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))y--; age=y+' anos'; }
               return (
-                <Link key={p.id} href={'/patients/' + p.id} className="px-4 lg:px-5 py-3.5 flex items-center gap-4 hover:bg-slate-50/50 transition-colors block">
+                <Link key={p.id} href={'/dental/patients/' + p.id} className="px-4 lg:px-5 py-3.5 flex items-center gap-4 hover:bg-slate-50/50 transition-colors block">
                   {p.photo_url ? (
                     <img src={p.photo_url} alt="" className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
                   ) : (

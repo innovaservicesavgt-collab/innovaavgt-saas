@@ -26,7 +26,7 @@ import { Plus, Trash2, AlertCircle } from 'lucide-react';
 import {
   createAgreement,
   updateAgreement,
-} from '@/app/legal/finances/actions';
+} from '@/app/(legal)/legal/finances/actions';
 import {
   MODALIDADES,
   MONEDAS,
@@ -34,11 +34,11 @@ import {
   ModalidadHonorario,
   formatMoney,
   getMonedaSymbol,
-} from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/constants';
 import {
   FeeAgreementWithInstallments,
   InstallmentInput,
-} from '@/app/legal/finances/types';
+} from '@/app/(legal)/legal/finances/types';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -82,7 +82,7 @@ export function FeeAgreementDialog({
   const [notas, setNotas] = useState<string>('');
   const [fechaAcuerdo, setFechaAcuerdo] = useState<string>(todayISO());
 
-  // Cargar datos al abrir (modo edición)
+  // Cargar datos al abrir (modo ediciÃ³n)
   useEffect(() => {
     if (open && agreement) {
       setMontoTotal(String(agreement.monto_total));
@@ -114,7 +114,7 @@ export function FeeAgreementDialog({
     }
   }, [open, agreement]);
 
-  // Auto-generar cuotas cuando cambia la modalidad/número
+  // Auto-generar cuotas cuando cambia la modalidad/nÃºmero
   const handleModalidadChange = (nueva: ModalidadHonorario) => {
     setModalidad(nueva);
     if (nueva === 'UNICO') {
@@ -152,7 +152,7 @@ export function FeeAgreementDialog({
     const newInstallments: InstallmentInput[] = Array.from({ length: count }, (_, i) => ({
       numero: i + 1,
       concepto: mod === 'POR_ETAPA' ? `Etapa ${i + 1}` : '',
-      monto: i === count - 1 ? montoPorCuota + resto : montoPorCuota, // El último absorbe el redondeo
+      monto: i === count - 1 ? montoPorCuota + resto : montoPorCuota, // El Ãºltimo absorbe el redondeo
       fecha_vencimiento: addDaysISO((i + 1) * 30),
     }));
 
@@ -175,7 +175,7 @@ export function FeeAgreementDialog({
   const diferencia = Number(montoTotal || 0) - sumaInstallments;
 
   const handleSubmit = () => {
-    // Validaciones básicas
+    // Validaciones bÃ¡sicas
     const montoNum = Number(montoTotal);
     if (!montoTotal || montoNum <= 0) {
       toast.error('El monto total debe ser mayor a 0');
@@ -185,7 +185,7 @@ export function FeeAgreementDialog({
     if (modalidad !== 'UNICO') {
       const n = Number(numeroCuotas);
       if (!n || n < 1 || n > 60) {
-        toast.error('El número de cuotas debe estar entre 1 y 60');
+        toast.error('El nÃºmero de cuotas debe estar entre 1 y 60');
         return;
       }
 
@@ -241,7 +241,7 @@ export function FeeAgreementDialog({
             {isEditing ? 'Editar acuerdo de honorarios' : 'Configurar honorarios'}
           </DialogTitle>
           <DialogDescription>
-            Define cómo se cobrarán los honorarios de este expediente
+            Define cÃ³mo se cobrarÃ¡n los honorarios de este expediente
           </DialogDescription>
         </DialogHeader>
 
@@ -342,7 +342,7 @@ export function FeeAgreementDialog({
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center justify-between gap-3">
                 <Label>
-                  {modalidad === 'CUOTAS' ? 'Número de cuotas' : 'Número de etapas'} *
+                  {modalidad === 'CUOTAS' ? 'NÃºmero de cuotas' : 'NÃºmero de etapas'} *
                 </Label>
                 <div className="w-24">
                   <Input

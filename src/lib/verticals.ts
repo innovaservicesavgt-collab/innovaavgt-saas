@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Configuración visual y metadatos de cada vertical del SaaS.
  *
  * IMPORTANTE: Este archivo es DIFERENTE de `src/lib/vertical.ts` (singular).
@@ -45,7 +45,7 @@ export const VERTICALS: Record<VerticalCode, VerticalConfig> = {
     emoji: '⚖️',
     description: 'Gestión de expedientes, plazos y clientes para despachos jurídicos',
     brandName: 'InnovaLegal',
-    dashboardPath: '/legal/dashboard',
+    dashboardPath: '/dental/dashboard',
     color: {
       bg: 'bg-blue-50',
       text: 'text-blue-700',
@@ -63,7 +63,7 @@ export const VERTICALS: Record<VerticalCode, VerticalConfig> = {
     emoji: '🦷',
     description: 'Pacientes, agenda, odontograma, tratamientos y pagos para clínicas dentales',
     brandName: 'InnovaDental',
-    dashboardPath: '/dashboard',
+    dashboardPath: '/dental/dashboard',
     color: {
       bg: 'bg-emerald-50',
       text: 'text-emerald-700',

@@ -6,7 +6,7 @@ import {
   getJuzgados,
   getFiscalias,
   getTiposProceso,
-} from '@/app/legal/catalogs/actions';
+} from '@/app/(legal)/legal/catalogs/actions';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -44,7 +44,7 @@ export default async function CaseDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Cargar listas y catálogos en paralelo
+  // Cargar listas y catÃ¡logos en paralelo
   const [clientsRes, abogadosRes, juzgados, fiscalias, tiposProceso] =
     await Promise.all([
       supabase

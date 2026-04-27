@@ -33,9 +33,9 @@ import {
   LegalExpenseWithRelations,
   TipoGastoCatalog,
   ExpenseStats,
-} from '@/app/legal/finances/types';
-import { toggleCobrado } from '@/app/legal/finances/expense-actions';
-import { formatMoney, Moneda } from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/types';
+import { toggleCobrado } from '@/app/(legal)/legal/finances/expense-actions';
+import { formatMoney, Moneda } from '@/app/(legal)/legal/finances/constants';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -83,7 +83,7 @@ export function ExpensesList({
   // Filtrado
   const filtered = useMemo(() => {
     return expenses.filter((exp) => {
-      // Filtro búsqueda
+      // Filtro bÃºsqueda
       if (search.trim()) {
         const q = search.toLowerCase();
         const matchNombre = exp.tipo_gasto?.nombre.toLowerCase().includes(q);
@@ -91,7 +91,7 @@ export function ExpensesList({
         if (!matchNombre && !matchDesc) return false;
       }
 
-      // Filtro categoría
+      // Filtro categorÃ­a
       if (filterCategoria !== 'ALL' && exp.tipo_gasto?.categoria !== filterCategoria) {
         return false;
       }
@@ -158,10 +158,10 @@ export function ExpensesList({
 
           <Select value={filterCategoria} onValueChange={setFilterCategoria}>
             <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Categoría" />
+              <SelectValue placeholder="CategorÃ­a" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Todas las categorías</SelectItem>
+              <SelectItem value="ALL">Todas las categorÃ­as</SelectItem>
               <SelectItem value="TIMBRE">Timbres</SelectItem>
               <SelectItem value="COPIAS">Copias</SelectItem>
               <SelectItem value="HONORARIOS_3RO">Honorarios 3ros</SelectItem>
@@ -263,7 +263,7 @@ export function ExpensesList({
                               variant="outline"
                               className="text-xs bg-green-50 text-green-700 border-green-200"
                             >
-                              ✓ Cobrado
+                              âœ“ Cobrado
                             </Badge>
                           )}
                           {exp.recuperable && !exp.cobrado && (
@@ -284,7 +284,7 @@ export function ExpensesList({
                           </span>
                           {exp.cobrado && exp.fecha_cobrado && (
                             <>
-                              <span>•</span>
+                              <span>â€¢</span>
                               <span className="text-green-600">
                                 Cobrado:{' '}
                                 {format(new Date(exp.fecha_cobrado), "d MMM", {

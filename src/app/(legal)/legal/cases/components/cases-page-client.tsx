@@ -9,7 +9,7 @@ import type {
   CatalogJuzgado,
   CatalogFiscalia,
   CatalogTipoProceso,
-} from '@/app/legal/catalogs/types';
+} from '@/app/(legal)/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;

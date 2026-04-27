@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth/guards';
+﻿import { requireAuth } from '@/lib/auth/guards';
 import { createServerSupabase } from '@/lib/supabase/server';
 import Link from 'next/link';
 
@@ -14,7 +14,7 @@ export default async function QuotationsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{quotations?.length || 0} cotizaciones</p>
-        <Link href="/quotations/new" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+        <Link href="/dental/quotations/new" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           Nueva cotizacion
         </Link>

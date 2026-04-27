@@ -27,16 +27,16 @@ import { toast } from 'sonner';
 import {
   createExpense,
   updateExpense,
-} from '@/app/legal/finances/expense-actions';
+} from '@/app/(legal)/legal/finances/expense-actions';
 import {
   MONEDAS,
   getMonedaSymbol,
-} from '@/app/legal/finances/constants';
-import type { Moneda } from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/constants';
+import type { Moneda } from '@/app/(legal)/legal/finances/constants';
 import type {
   LegalExpenseWithRelations,
   TipoGastoCatalog,
-} from '@/app/legal/finances/types';
+} from '@/app/(legal)/legal/finances/types';
 
 type Props = {
   open: boolean;
@@ -150,7 +150,7 @@ export function ExpenseDialog({
       return;
     }
     if (cobrado && !fechaCobrado) {
-      toast.error('Indica la fecha en que se cobró');
+      toast.error('Indica la fecha en que se cobrÃ³');
       return;
     }
     if (cobrado && !recuperable) {
@@ -284,12 +284,12 @@ export function ExpenseDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descripcion">Descripción</Label>
+            <Label htmlFor="descripcion">DescripciÃ³n</Label>
             <Textarea
               id="descripcion"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Detalles específicos del gasto..."
+              placeholder="Detalles especÃ­ficos del gasto..."
               rows={2}
             />
           </div>
@@ -314,7 +314,7 @@ export function ExpenseDialog({
                     Cobrar al cliente
                   </div>
                   <p className="text-xs text-gray-500">
-                    Este gasto se sumará a las cuentas por cobrar del cliente
+                    Este gasto se sumarÃ¡ a las cuentas por cobrar del cliente
                   </p>
                 </div>
               </label>

@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth/guards';
+﻿import { requireAuth } from '@/lib/auth/guards';
 import { createServerSupabase } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { AppointmentFilters } from '@/components/appointments/filters';
@@ -29,7 +29,7 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <p className="text-sm text-slate-500">{counts.all} citas</p>
-        <Link href="/appointments/new" className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+        <Link href="/dental/appointments/new" className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>Nueva cita
         </Link>
       </div>
@@ -40,7 +40,7 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
         ) : (
           <div className="divide-y divide-slate-100">
             {appointments.map((apt: any) => (
-              <Link key={apt.id} href={'/appointments/' + apt.id} className="px-4 lg:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-slate-50/50 transition-colors block">
+              <Link key={apt.id} href={'/dental/appointments/' + apt.id} className="px-4 lg:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-slate-50/50 transition-colors block">
                 <div className="flex sm:flex-col items-center gap-2 sm:gap-0 sm:w-16 sm:text-center flex-shrink-0">
                   <span className="text-xs text-slate-400 uppercase">{new Date(apt.appointment_date+'T12:00:00').toLocaleDateString('es',{weekday:'short',month:'short'})}</span>
                   <span className="text-xl font-bold text-slate-700">{new Date(apt.appointment_date+'T12:00:00').getDate()}</span>

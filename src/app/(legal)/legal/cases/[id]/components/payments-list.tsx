@@ -21,12 +21,12 @@ import {
 import {
   LegalFeeInstallment,
   LegalPaymentWithRelations,
-} from '@/app/legal/finances/types';
+} from '@/app/(legal)/legal/finances/types';
 import {
   formatMoney,
   METODOS_PAGO,
   Moneda,
-} from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/constants';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -81,7 +81,7 @@ export function PaymentsList({
               Sin pagos registrados
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Usa el botón &quot;Registrar pago&quot; para añadir el primero
+              Usa el botÃ³n &quot;Registrar pago&quot; para aÃ±adir el primero
             </p>
           </div>
         </CardContent>
@@ -135,7 +135,7 @@ export function PaymentsList({
                             >
                               Cuota #{pago.installment.numero}
                               {pago.installment.concepto &&
-                                ` — ${pago.installment.concepto}`}
+                                ` â€” ${pago.installment.concepto}`}
                             </Badge>
                           )}
                         </div>
@@ -146,11 +146,11 @@ export function PaymentsList({
                               locale: es,
                             })}
                           </span>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>{autor}</span>
                           {pago.referencia && (
                             <>
-                              <span>•</span>
+                              <span>â€¢</span>
                               <span className="font-mono">{pago.referencia}</span>
                             </>
                           )}
@@ -197,7 +197,7 @@ export function PaymentsList({
         </CardContent>
       </Card>
 
-      {/* Modal de edición */}
+      {/* Modal de ediciÃ³n */}
       <PaymentDialog
         open={editOpen}
         onOpenChange={setEditOpen}
@@ -208,7 +208,7 @@ export function PaymentsList({
         editingPayment={editing}
       />
 
-      {/* Modal de confirmación de eliminar */}
+      {/* Modal de confirmaciÃ³n de eliminar */}
       <DeletePaymentDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

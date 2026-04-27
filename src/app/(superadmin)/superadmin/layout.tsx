@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase/server';
 import SuperadminSidebar from '@/components/superadmin/sidebar';
 import SuperadminTopbar from '@/components/superadmin/topbar-wrapper';
@@ -22,7 +22,7 @@ export default async function SuperadminLayout({
     .single();
 
   if (error || !profile?.is_superadmin) {
-    redirect('/dashboard');
+    redirect('/dental/dashboard');
   }
 
   return (

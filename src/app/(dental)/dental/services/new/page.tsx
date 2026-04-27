@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -18,14 +18,14 @@ export default function NewServicePage() {
       const res = await fetch('/api/services', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, duration_minutes: parseInt(form.duration_minutes), price: form.price ? parseFloat(form.price) : null }) });
       if (!res.ok) { const d = await res.json(); setError(d.error || 'Error'); return; }
-      router.push('/services'); router.refresh();
+      router.push('/dental/services'); router.refresh();
     } catch { setError('Error'); } finally { setLoading(false); }
   };
 
   return (
     <div className="max-w-xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/services" className="text-slate-400 hover:text-slate-600"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg></Link>
+        <Link href="/dental/services" className="text-slate-400 hover:text-slate-600"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg></Link>
         <h2 className="text-xl font-bold text-slate-800">Nuevo servicio</h2>
       </div>
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 space-y-4">
@@ -41,7 +41,7 @@ export default function NewServicePage() {
           <div><label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label><input type="color" value={form.color} onChange={e => update('color', e.target.value)} className="w-12 h-10 rounded border border-slate-200 cursor-pointer" /></div>
         </div>
         <div className="flex gap-3 pt-2">
-          <Link href="/services" className="flex-1 py-2.5 text-center bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200">Cancelar</Link>
+          <Link href="/dental/services" className="flex-1 py-2.5 text-center bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200">Cancelar</Link>
           <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">{loading ? 'Guardando...' : 'Guardar servicio'}</button>
         </div>
       </form>

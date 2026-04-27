@@ -1,4 +1,4 @@
-import { createServerSupabase } from '@/lib/supabase/server';
+﻿import { createServerSupabase } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 export async function getCurrentUser() {
@@ -31,6 +31,6 @@ export async function requireAuth() {
 
 export async function requireAdmin() {
   const user = await requireAuth();
-  if (user.roleName !== 'admin' && !user.isSuperadmin) redirect('/dashboard');
+  if (user.roleName !== 'admin' && !user.isSuperadmin) redirect('/dental/dashboard');
   return user;
 }

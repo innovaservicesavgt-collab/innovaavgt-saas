@@ -13,14 +13,14 @@ import { CaseAgendaTab } from './case-agenda-tab';
 import { CaseDocumentsTab } from './case-documents-tab';
 import { CaseActionsTab } from './case-actions-tab';
 import { CaseFinancesTab } from './case-finances-tab';
-import { AuditCaseHistory } from '@/app/legal/audit/components/audit-case-history';
-import type { LegalCaseWithRelations } from '@/app/legal/cases/types';
-import type { ClientOption } from '@/app/legal/cases/components/client-selector';
+import { AuditCaseHistory } from '@/app/(legal)/legal/audit/components/audit-case-history';
+import type { LegalCaseWithRelations } from '@/app/(legal)/legal/cases/types';
+import type { ClientOption } from '@/app/(legal)/legal/cases/components/client-selector';
 import type {
   CatalogJuzgado,
   CatalogFiscalia,
   CatalogTipoProceso,
-} from '@/app/legal/catalogs/types';
+} from '@/app/(legal)/legal/catalogs/types';
 
 type AbogadoOption = {
   id: string;

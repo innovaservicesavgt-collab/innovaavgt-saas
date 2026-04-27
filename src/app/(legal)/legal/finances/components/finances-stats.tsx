@@ -5,8 +5,8 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { formatMoney } from '@/app/legal/finances/constants';
-import type { FinancesDashboardData } from '@/app/legal/finances/types';
+import { formatMoney } from '@/app/(legal)/legal/finances/constants';
+import type { FinancesDashboardData } from '@/app/(legal)/legal/finances/types';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -83,7 +83,7 @@ export function FinancesStats({ data }: Props) {
                     variacionMensual >= 0 ? 'text-green-600' : 'text-red-600'
                   )}
                 >
-                  {variacionMensual >= 0 ? '↑' : '↓'}{' '}
+                  {variacionMensual >= 0 ? 'â†‘' : 'â†“'}{' '}
                   {Math.abs(variacionMensual).toFixed(1)}% vs mes anterior
                 </p>
               )}

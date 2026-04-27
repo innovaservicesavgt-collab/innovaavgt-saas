@@ -36,9 +36,9 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">{(apt.patients as any)?.first_name?.charAt(0)}{(apt.patients as any)?.last_name?.charAt(0)}</div>
           <div>
             <p className="text-sm font-semibold text-slate-800">{(apt.patients as any)?.first_name} {(apt.patients as any)?.last_name}</p>
-            <p className="text-xs text-slate-400">{(apt.patients as any)?.phone} {(apt.patients as any)?.email ? '· ' + (apt.patients as any).email : ''}</p>
+            <p className="text-xs text-slate-400">{(apt.patients as any)?.phone} {(apt.patients as any)?.email ? 'Â· ' + (apt.patients as any).email : ''}</p>
           </div>
-          <Link href={'/patients/' + apt.patient_id} className="ml-auto text-xs text-blue-600 hover:underline">Ver expediente</Link>
+          <Link href={'/dental/patients/' + apt.patient_id} className="ml-auto text-xs text-blue-600 hover:underline">Ver expediente</Link>
         </div>
 
         {/* Details grid */}

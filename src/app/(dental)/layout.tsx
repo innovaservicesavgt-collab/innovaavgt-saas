@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { getCurrentProfile } from '@/lib/tenant';
 import { DentalSidebar } from '@/components/dental/dental-sidebar';
 import { DentalMobileNav } from '@/components/dental/dental-mobile-nav';
@@ -44,7 +44,7 @@ export default async function DentalLayout({
       redirect('/legal/dashboard');
     }
     // fallback: router maestro decide
-    redirect('/dashboard');
+    redirect('/dental/dashboard');
   }
 
   // 5. Datos para componentes

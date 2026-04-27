@@ -24,17 +24,17 @@ import { toast } from 'sonner';
 import {
   createPayment,
   updatePayment,
-} from '@/app/legal/finances/payment-actions';
+} from '@/app/(legal)/legal/finances/payment-actions';
 import {
   METODOS_PAGO,
   formatMoney,
   getMonedaSymbol,
   Moneda,
-} from '@/app/legal/finances/constants';
+} from '@/app/(legal)/legal/finances/constants';
 import {
   LegalFeeInstallment,
   LegalPaymentWithRelations,
-} from '@/app/legal/finances/types';
+} from '@/app/(legal)/legal/finances/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -83,7 +83,7 @@ export function PaymentDialog({
   useEffect(() => {
     if (open) {
       if (editingPayment) {
-        // Modo edición
+        // Modo ediciÃ³n
         setMonto(String(editingPayment.monto));
         setFechaPago(editingPayment.fecha_pago);
         setMetodo(editingPayment.metodo);
@@ -91,7 +91,7 @@ export function PaymentDialog({
         setReferencia(editingPayment.referencia || '');
         setNotas(editingPayment.notas || '');
       } else {
-        // Modo crear: sugerir próxima cuota si hay
+        // Modo crear: sugerir prÃ³xima cuota si hay
         setMonto('');
         setFechaPago(todayISO());
         setMetodo('EFECTIVO');
@@ -103,7 +103,7 @@ export function PaymentDialog({
         } else if (cuotasDisponibles.length > 0) {
           const proxima = cuotasDisponibles[0];
           setInstallmentId(proxima.id);
-          // Auto-sugerir el monto pendiente de la próxima cuota
+          // Auto-sugerir el monto pendiente de la prÃ³xima cuota
           const pendiente =
             Number(proxima.monto) - Number(proxima.monto_pagado || 0);
           setMonto(String(pendiente));
@@ -209,9 +209,9 @@ export function PaymentDialog({
             />
           </div>
 
-          {/* Método */}
+          {/* MÃ©todo */}
           <div className="space-y-2">
-            <Label htmlFor="metodo">Método de pago *</Label>
+            <Label htmlFor="metodo">MÃ©todo de pago *</Label>
             <Select value={metodo} onValueChange={setMetodo}>
               <SelectTrigger id="metodo">
                 <SelectValue />
@@ -242,13 +242,13 @@ export function PaymentDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NINGUNA">
-                    Sin aplicar a cuota específica
+                    Sin aplicar a cuota especÃ­fica
                   </SelectItem>
                   {installments.map((inst) => {
                     const pendiente =
                       Number(inst.monto) - Number(inst.monto_pagado || 0);
                     const yaEsPagada = inst.estado === 'PAGADA';
-                    // Solo mostrar la cuota actual si está editando y tiene esa cuota
+                    // Solo mostrar la cuota actual si estÃ¡ editando y tiene esa cuota
                     const mostrarEnEdicion =
                       isEditing && editingPayment?.installment_id === inst.id;
                     if (yaEsPagada && !mostrarEnEdicion) return null;
@@ -263,7 +263,7 @@ export function PaymentDialog({
                             {inst.concepto || `Cuota ${inst.numero}`}
                           </span>
                           <span className="text-gray-500">
-                            — {formatMoney(pendiente, moneda)} pendiente
+                            â€” {formatMoney(pendiente, moneda)} pendiente
                           </span>
                         </div>
                       </SelectItem>
@@ -281,7 +281,7 @@ export function PaymentDialog({
               id="referencia"
               value={referencia}
               onChange={(e) => setReferencia(e.target.value)}
-              placeholder="Ej: Número de boleta, ref. transferencia..."
+              placeholder="Ej: NÃºmero de boleta, ref. transferencia..."
             />
           </div>
 

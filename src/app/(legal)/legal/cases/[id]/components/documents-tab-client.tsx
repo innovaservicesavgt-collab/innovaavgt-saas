@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { DocumentsList } from '@/app/legal/documents/components/documents-list';
-import { UploadDialog } from '@/app/legal/documents/components/upload-dialog';
-import { LegalDocumentWithCase } from '@/app/legal/documents/types';
+import { DocumentsList } from '@/app/(legal)/legal/documents/components/documents-list';
+import { UploadDialog } from '@/app/(legal)/legal/documents/components/upload-dialog';
+import { LegalDocumentWithCase } from '@/app/(legal)/legal/documents/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatFileSize } from '@/app/legal/documents/constants';
+import { formatFileSize } from '@/app/(legal)/legal/documents/constants';
 
 type CaseOption = {
   id: string;

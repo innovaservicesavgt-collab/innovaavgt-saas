@@ -2,8 +2,8 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Receipt, CheckCircle2, AlertCircle, Ban } from 'lucide-react';
-import { ExpenseStats } from '@/app/legal/finances/types';
-import { formatMoney, Moneda } from '@/app/legal/finances/constants';
+import { ExpenseStats } from '@/app/(legal)/legal/finances/types';
+import { formatMoney, Moneda } from '@/app/(legal)/legal/finances/constants';
 
 type Props = {
   stats: ExpenseStats;
