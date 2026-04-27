@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface FiltersProps {
@@ -16,7 +16,7 @@ export function AppointmentFilters({ currentStatus, currentDate, counts, statusL
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== 'all') params.set(key, value);
     else params.delete(key);
-    router.push('/appointments?' + params.toString());
+    router.push('/dental/appointments?' + params.toString());
   };
 
   const statuses = ['all','scheduled','confirmed','in_progress','completed','cancelled','no_show'];

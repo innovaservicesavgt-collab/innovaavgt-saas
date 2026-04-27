@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -8,7 +8,7 @@ export function PatientSearch({ currentQuery }: { currentQuery: string }) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/patients' + (q ? '?q=' + encodeURIComponent(q) : ''));
+    router.push('/dental/patients' + (q ? '?q=' + encodeURIComponent(q) : ''));
   };
 
   return (

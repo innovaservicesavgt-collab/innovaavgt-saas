@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const p = request.nextUrl.pathname;
-  const protectedPaths = ['/dashboard','/appointments','/calendar','/patients','/professionals','/services','/branches','/settings','/reports','/users'];
+  const protectedPaths = ['/dental','/legal','/superadmin'];
   const adminPaths = ['/admin'];
   const isProtected = protectedPaths.some((x) => p.startsWith(x));
   const isAdminPath = adminPaths.some((x) => p.startsWith(x));
@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && (p === '/login' || p === '/register')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/dental/dashboard', request.url));
   }
 
   return response;
