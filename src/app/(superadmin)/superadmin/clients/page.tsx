@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { VerticalBadge } from '@/components/shared/vertical-badge';
+import type { VerticalCode } from '@/lib/verticals';
 import {
   Building2,
-  Plus,
   Search,
   Users,
   Clock3,
@@ -10,7 +11,21 @@ import {
   Pencil,
   Wallet,
   CircleAlert,
+  TrendingUp,
+  X,
+  Scale,
+  Stethoscope,
 } from 'lucide-react';
+
+// ─────────────────────────────────────────────────────────────────
+// Tipos
+// ─────────────────────────────────────────────────────────────────
+type TenantPlan = {
+  id: string;
+  code: string;
+  name: string;
+  monthly_price: number;
+};
 
 type Tenant = {
   id: string;
@@ -21,17 +36,25 @@ type Tenant = {
   tenant_status: string | null;
   payment_status: string | null;
   monthly_fee: number | null;
+  vertical: VerticalCode | null;
+  brand_name: string | null;
+  plan: TenantPlan | null;
   created_at?: string | null;
 };
 
+// ⚠️ IMPORTANTE (Next.js 15/16): searchParams es Promise, se debe awaitear.
 type PageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     q?: string;
     status?: string;
     payment?: string;
-  };
+    vertical?: string;
+  }>;
 };
 
+// ─────────────────────────────────────────────────────────────────
+// Data fetching
+// ─────────────────────────────────────────────────────────────────
 async function getClients(): Promise<Tenant[]> {
   const { data, error } = await supabaseAdmin
     .from('tenants')
@@ -45,76 +68,65 @@ async function getClients(): Promise<Tenant[]> {
       tenant_status,
       payment_status,
       monthly_fee,
+      vertical,
+      brand_name,
+      plan:plans ( id, code, name, monthly_price ),
       created_at
     `
     )
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
-  return data as Tenant[];
+  if (error) {
+    console.error('[superadmin/clients] Error:', error);
+    return [];
+  }
+  if (!data) return [];
+
+  return data as unknown as Tenant[];
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Helpers de presentación
+// ─────────────────────────────────────────────────────────────────
 function paymentText(value: string | null) {
   switch (value) {
-    case 'current':
-      return 'Al día';
-    case 'pending':
-      return 'Pendiente';
-    case 'overdue':
-      return 'Vencido';
-    case 'grace':
-      return 'En gracia';
-    case 'suspended':
-      return 'Suspendido';
-    default:
-      return 'Sin definir';
+    case 'current': return 'Al día';
+    case 'pending': return 'Pendiente';
+    case 'overdue': return 'Vencido';
+    case 'grace': return 'En gracia';
+    case 'suspended': return 'Suspendido';
+    default: return 'Sin definir';
   }
 }
 
 function paymentBadge(value: string | null) {
   switch (value) {
-    case 'current':
-      return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-    case 'pending':
-      return 'bg-amber-100 text-amber-700 border border-amber-200';
-    case 'overdue':
-      return 'bg-rose-100 text-rose-700 border border-rose-200';
-    case 'grace':
-      return 'bg-sky-100 text-sky-700 border border-sky-200';
-    case 'suspended':
-      return 'bg-slate-200 text-slate-700 border border-slate-300';
-    default:
-      return 'bg-slate-100 text-slate-700 border border-slate-200';
+    case 'current': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+    case 'pending': return 'bg-amber-100 text-amber-700 border border-amber-200';
+    case 'overdue': return 'bg-rose-100 text-rose-700 border border-rose-200';
+    case 'grace': return 'bg-sky-100 text-sky-700 border border-sky-200';
+    case 'suspended': return 'bg-slate-200 text-slate-700 border border-slate-300';
+    default: return 'bg-slate-100 text-slate-700 border border-slate-200';
   }
 }
 
 function statusText(value: string | null) {
   switch (value) {
-    case 'active':
-      return 'Activa';
-    case 'trial':
-      return 'En prueba';
-    case 'suspended':
-      return 'Suspendida';
-    case 'cancelled':
-      return 'Cancelada';
-    default:
-      return 'Sin definir';
+    case 'active': return 'Activa';
+    case 'trial': return 'En prueba';
+    case 'suspended': return 'Suspendida';
+    case 'cancelled': return 'Cancelada';
+    default: return 'Sin definir';
   }
 }
 
 function statusBadge(value: string | null) {
   switch (value) {
-    case 'active':
-      return 'bg-blue-100 text-blue-700 border border-blue-200';
-    case 'trial':
-      return 'bg-violet-100 text-violet-700 border border-violet-200';
-    case 'suspended':
-      return 'bg-rose-100 text-rose-700 border border-rose-200';
-    case 'cancelled':
-      return 'bg-slate-200 text-slate-700 border border-slate-300';
-    default:
-      return 'bg-slate-100 text-slate-700 border border-slate-200';
+    case 'active': return 'bg-blue-100 text-blue-700 border border-blue-200';
+    case 'trial': return 'bg-violet-100 text-violet-700 border border-violet-200';
+    case 'suspended': return 'bg-rose-100 text-rose-700 border border-rose-200';
+    case 'cancelled': return 'bg-slate-200 text-slate-700 border border-slate-300';
+    default: return 'bg-slate-100 text-slate-700 border border-slate-200';
   }
 }
 
@@ -124,6 +136,22 @@ function getSubdomain(client: Tenant) {
   return 'Sin subdominio';
 }
 
+// Construye el href de una tab de vertical preservando los otros filtros
+function buildVerticalHref(
+  target: 'all' | VerticalCode,
+  params: { q: string; status: string; payment: string }
+) {
+  const query: Record<string, string> = {};
+  if (target !== 'all') query.vertical = target;
+  if (params.q) query.q = params.q;
+  if (params.status) query.status = params.status;
+  if (params.payment) query.payment = params.payment;
+  return { pathname: '/superadmin/clients', query };
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Componentes locales
+// ─────────────────────────────────────────────────────────────────
 function StatCard({
   title,
   value,
@@ -137,17 +165,100 @@ function StatCard({
 }) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-4">
-        <div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
+          <p className="mt-2 truncate text-3xl font-bold tracking-tight text-slate-900">
             {value}
           </p>
         </div>
-        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${iconBg}`}>
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${iconBg}`}
+        >
           {icon}
         </div>
       </div>
+    </div>
+  );
+}
+
+function VerticalTabs({
+  vertical,
+  totalClients,
+  legalCount,
+  dentalCount,
+  currentParams,
+}: {
+  vertical: string;
+  totalClients: number;
+  legalCount: number;
+  dentalCount: number;
+  currentParams: { q: string; status: string; payment: string };
+}) {
+  const isAll = vertical === '';
+  const isLegal = vertical === 'legal';
+  const isDental = vertical === 'dental';
+
+  // Estilos base iguales; los colores cambian por vertical
+  const baseTab =
+    'inline-flex items-center gap-2.5 rounded-xl px-5 py-3 text-base font-semibold transition-all duration-150';
+
+  const tabAll = isAll
+    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
+    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60';
+
+  const tabLegal = isLegal
+    ? 'bg-blue-600 text-white shadow-sm'
+    : 'text-slate-600 hover:text-blue-700 hover:bg-white/60';
+
+  const tabDental = isDental
+    ? 'bg-emerald-600 text-white shadow-sm'
+    : 'text-slate-600 hover:text-emerald-700 hover:bg-white/60';
+
+  const counterAll = isAll
+    ? 'bg-slate-100 text-slate-700'
+    : 'bg-slate-200/80 text-slate-600';
+  const counterLegal = isLegal
+    ? 'bg-white/25 text-white'
+    : 'bg-blue-50 text-blue-700';
+  const counterDental = isDental
+    ? 'bg-white/25 text-white'
+    : 'bg-emerald-50 text-emerald-700';
+
+  return (
+    <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1.5">
+      <Link
+        href={buildVerticalHref('all', currentParams)}
+        className={`${baseTab} ${tabAll}`}
+      >
+        <Users className="h-5 w-5" />
+        <span>Todos</span>
+        <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${counterAll}`}>
+          {totalClients}
+        </span>
+      </Link>
+
+      <Link
+        href={buildVerticalHref('legal', currentParams)}
+        className={`${baseTab} ${tabLegal}`}
+      >
+        <Scale className="h-5 w-5" />
+        <span>Legal</span>
+        <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${counterLegal}`}>
+          {legalCount}
+        </span>
+      </Link>
+
+      <Link
+        href={buildVerticalHref('dental', currentParams)}
+        className={`${baseTab} ${tabDental}`}
+      >
+        <Stethoscope className="h-5 w-5" />
+        <span>Dental</span>
+        <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${counterDental}`}>
+          {dentalCount}
+        </span>
+      </Link>
     </div>
   );
 }
@@ -199,10 +310,7 @@ function DonutChart({
         </div>
       </div>
 
-      <div
-        className="relative h-40 w-40 rounded-full"
-        style={{ background }}
-      >
+      <div className="relative h-40 w-40 rounded-full" style={{ background }}>
         <div className="absolute inset-[18px] flex items-center justify-center rounded-full bg-white shadow-inner">
           <span className="text-lg font-semibold text-slate-500">{percent}%</span>
         </div>
@@ -211,13 +319,23 @@ function DonutChart({
   );
 }
 
+// ─────────────────────────────────────────────────────────────────
+// PÁGINA
+// ─────────────────────────────────────────────────────────────────
 export default async function SuperadminClientsPage({ searchParams }: PageProps) {
-  const q = (searchParams?.q || '').trim().toLowerCase();
-  const status = (searchParams?.status || '').trim().toLowerCase();
-  const payment = (searchParams?.payment || '').trim().toLowerCase();
+  // ⚠️ CRÍTICO: awaitear searchParams (Next.js 15/16)
+  const params = (await searchParams) ?? {};
+
+  const q = (params.q || '').trim().toLowerCase();
+  const status = (params.status || '').trim().toLowerCase();
+  const payment = (params.payment || '').trim().toLowerCase();
+  const vertical = (params.vertical || '').trim().toLowerCase();
+
+  const hasActiveFilters = Boolean(q || status || payment || vertical);
 
   const allClients = await getClients();
 
+  // Filtros
   const clients = allClients.filter((client) => {
     const matchesQ =
       !q ||
@@ -228,10 +346,12 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
 
     const matchesStatus = !status || (client.tenant_status || '') === status;
     const matchesPayment = !payment || (client.payment_status || '') === payment;
+    const matchesVertical = !vertical || (client.vertical || '') === vertical;
 
-    return matchesQ && matchesStatus && matchesPayment;
+    return matchesQ && matchesStatus && matchesPayment && matchesVertical;
   });
 
+  // KPIs (sobre el total, no sobre el filtro)
   const totalClients = allClients.length;
   const activeClients = allClients.filter((c) => c.tenant_status === 'active').length;
   const overdueClients = allClients.filter(
@@ -239,18 +359,31 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
   ).length;
   const trialClients = allClients.filter((c) => c.tenant_status === 'trial').length;
   const suspendedClients = allClients.filter((c) => c.tenant_status === 'suspended').length;
+
   const expectedIncome = allClients.reduce(
     (sum, c) => sum + Number(c.monthly_fee || 0),
     0
   );
 
+  const mrrActive = allClients
+    .filter((c) => c.tenant_status === 'active')
+    .reduce((sum, c) => sum + Number(c.monthly_fee || 0), 0);
+
+  // Contadores por vertical
+  const legalCount = allClients.filter((c) => c.vertical === 'legal').length;
+  const dentalCount = allClients.filter((c) => c.vertical === 'dental').length;
+
+  const currentParams = { q, status, payment };
+
   return (
     <div className="space-y-6">
+      {/* Breadcrumb */}
       <div className="text-sm text-slate-500">
         Inicio <span className="mx-2">›</span>
         <span className="font-medium text-slate-700">Clientes</span>
       </div>
 
+      {/* Header */}
       <section className="rounded-[32px] border border-slate-200 bg-white px-8 py-8 shadow-sm">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
           <div>
@@ -272,7 +405,8 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+      {/* KPIs — 6 cards */}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           title="Total de clientes"
           value={totalClients}
@@ -303,23 +437,64 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
           icon={<Wallet className="h-6 w-6 text-emerald-600" />}
           iconBg="bg-emerald-50"
         />
+        <StatCard
+          title="MRR activo"
+          value={`Q${mrrActive.toFixed(2)}`}
+          icon={<TrendingUp className="h-6 w-6 text-green-600" />}
+          iconBg="bg-green-50"
+        />
       </section>
 
+      {/* Tabs por vertical */}
+      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <VerticalTabs
+          vertical={vertical}
+          totalClients={totalClients}
+          legalCount={legalCount}
+          dentalCount={dentalCount}
+          currentParams={currentParams}
+        />
+
+        {hasActiveFilters && (
+          <Link
+            href="/superadmin/clients"
+            className="inline-flex items-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:self-auto"
+          >
+            <X className="h-4 w-4" />
+            Limpiar filtros
+          </Link>
+        )}
+      </section>
+
+      {/* Tabla */}
       <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-6 py-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div>
               <h3 className="text-2xl font-bold text-slate-900">
                 Listado de clientes
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                Consulta rápidamente estado, pago, subdominio y acciones.
+                Consulta vertical, estado, plan, pago y acciones rápidas.
               </p>
             </div>
 
-            <form method="GET" className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            {/*
+              action explícito + method GET → al enviar, Next.js re-renderiza
+              la misma página con los query params. No se necesita JS.
+            */}
+            <form
+              method="GET"
+              action="/superadmin/clients"
+              className="grid grid-cols-1 gap-3 md:grid-cols-4 xl:min-w-[680px]"
+            >
+              {/* Preserva el vertical activo al hacer búsqueda */}
+              {vertical && (
+                <input type="hidden" name="vertical" value={vertical} />
+              )}
+
               <div className="relative md:col-span-2">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                   name="q"
                   defaultValue={q}
@@ -356,7 +531,7 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
 
                 <button
                   type="submit"
-                  className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                  className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
                 >
                   Buscar
                 </button>
@@ -369,24 +544,14 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
           <table className="min-w-full">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
-                  Empresa
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
-                  Subdominio
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
-                  Estado
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
-                  Pago
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
-                  Mensualidad
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
-                  Acciones
-                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Empresa</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Vertical</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Plan</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Subdominio</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Estado</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Pago</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Mensualidad</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">Acciones</th>
               </tr>
             </thead>
 
@@ -394,10 +559,21 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
               {clients.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={8}
                     className="px-6 py-12 text-center text-sm text-slate-500"
                   >
-                    No se encontraron clientes.
+                    No se encontraron clientes con los filtros aplicados.
+                    {hasActiveFilters && (
+                      <>
+                        {' '}
+                        <Link
+                          href="/superadmin/clients"
+                          className="font-semibold text-blue-600 hover:underline"
+                        >
+                          Limpiar filtros
+                        </Link>
+                      </>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -408,23 +584,45 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
                   >
                     <td className="px-6 py-5 align-middle">
                       <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-xl font-bold text-blue-700">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-xl font-bold text-blue-700">
                           {client.name?.charAt(0)?.toUpperCase() || 'C'}
                         </div>
 
-                        <div>
-                          <div className="text-base font-semibold text-slate-900">
+                        <div className="min-w-0">
+                          <div className="truncate text-base font-semibold text-slate-900">
                             {client.name}
                           </div>
-                          <div className="text-sm text-slate-500">
+                          <div className="truncate text-sm text-slate-500">
                             {client.email || 'Sin correo'}
                           </div>
                         </div>
                       </div>
                     </td>
 
+                    <td className="px-6 py-5 align-middle">
+                      <VerticalBadge
+                        vertical={client.vertical}
+                        variant="compact"
+                      />
+                    </td>
+
+                    <td className="px-6 py-5 align-middle">
+                      {client.plan ? (
+                        <div>
+                          <div className="text-sm font-semibold text-slate-900">
+                            {client.plan.name}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {client.plan.code}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-slate-400">— Sin plan</span>
+                      )}
+                    </td>
+
                     <td className="px-6 py-5 align-middle text-sm text-slate-700">
-                      <div className="max-w-[240px] break-words">
+                      <div className="max-w-[220px] break-words">
                         {getSubdomain(client)}
                       </div>
                     </td>
@@ -481,7 +679,7 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
 
         <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
           <div>
-            Mostrando clientes del 1 al {clients.length} de un total de {clients.length}
+            Mostrando {clients.length} de {totalClients} clientes
           </div>
 
           <div className="flex items-center gap-2">
@@ -507,6 +705,7 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
         </div>
       </section>
 
+      {/* Últimos clientes + Donut */}
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-6 py-5">
@@ -524,9 +723,15 @@ export default async function SuperadminClientsPage({ searchParams }: PageProps)
                   key={client.id}
                   className="flex items-center justify-between gap-4 px-6 py-4"
                 >
-                  <div className="min-w-0">
-                    <div className="truncate font-semibold text-slate-900">
-                      {client.name}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate font-semibold text-slate-900">
+                        {client.name}
+                      </span>
+                      <VerticalBadge
+                        vertical={client.vertical}
+                        variant="dot"
+                      />
                     </div>
                     <div className="truncate text-sm text-slate-500">
                       {getSubdomain(client)}

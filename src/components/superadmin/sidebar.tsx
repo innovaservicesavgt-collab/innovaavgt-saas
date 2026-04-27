@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Building2,
+  Package,
   CreditCard,
   BarChart3,
   Settings,
@@ -14,6 +15,7 @@ import {
 const items = [
   { href: '/superadmin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/superadmin/clients', label: 'Clientes', icon: Building2 },
+  { href: '/superadmin/plans', label: 'Planes', icon: Package },
   { href: '/superadmin/payments', label: 'Pagos', icon: CreditCard },
   { href: '/superadmin/reports', label: 'Reportes', icon: BarChart3 },
   { href: '/superadmin/settings', label: 'Configuración', icon: Settings },
@@ -41,8 +43,11 @@ export default function SuperadminSidebar() {
       <nav className="flex-1 px-5 py-6">
         <div className="space-y-2">
           {items.map((item) => {
+            // Fix del matcher: evita que "/superadmin" marque todas las rutas hijas
             const active =
-              pathname === item.href || pathname.startsWith(item.href + '/');
+              item.href === '/superadmin'
+                ? pathname === '/superadmin'
+                : pathname === item.href || pathname.startsWith(item.href + '/');
             const Icon = item.icon;
 
             return (
