@@ -14,31 +14,24 @@ export type Quotation = {
   id: string;
   tenant_id: string;
   patient_id: string;
-  appointment_id: string | null;
-  professional_id: string | null;
-  service_id: string | null;
   quotation_number: string | null;
-  title: string;
-  description: string | null;
   status: QuotationStatus;
   notes: string | null;
-  cost: number | null;
-  issued_at: string | null;
-  valid_until: string | null;
   subtotal: number | null;
   discount_type: DiscountType | null;
   discount_value: number | null;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  total: number | null;
   total_amount: number | null;
+  valid_until: string | null;
   terms: string | null;
   internal_notes: string | null;
+  issued_at: string | null;
   accepted_at: string | null;
   rejected_at: string | null;
   treatment_plan_id: string | null;
   created_by: string | null;
-  started_at: string | null;
-  completed_at: string | null;
-  tooth_number: string | null;
-  area: string | null;
   created_at: string | null;
   updated_at: string | null;
 };
@@ -63,14 +56,19 @@ export type QuotationWithPatient = Quotation & {
     last_name: string;
     phone: string | null;
   } | null;
-  professionals: {
-    first_name: string;
-    last_name: string;
-    title: string | null;
-  } | null;
   items_count: number;
 };
 
+// Helper: extraer titulo y descripcion del campo notes (formato: 'TITULO\n\nDescripcion')
+export function parseQuotationNotes(notes: string | null): { title: string; description: string } {
+  if (!notes) return { title: 'Sin titulo', description: '' };
+  const parts = notes.split('\n\n');
+  const title = parts[0] || 'Sin titulo';
+  const description = parts.slice(1).join('\n\n');
+  return { title, description };
+}
+
+// Configuracion visual de estados
 export const QUOTATION_STATUS_CONFIG: Record<
   QuotationStatus,
   { label: string; color: string; bg: string; border: string }

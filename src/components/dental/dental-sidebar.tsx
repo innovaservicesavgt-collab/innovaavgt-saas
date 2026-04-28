@@ -70,6 +70,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/dental/quotations', label: 'Cotizaciones', icon: FileText },
       { href: '/dental/treatments', label: 'Tratamientos', icon: Activity, feature: 'treatment_plans' },
       { href: '/dental/payments', label: 'Pagos', icon: Wallet, feature: 'payments' },
+  { href: '/dental/dashboard/cobranza', label: 'Cobranza', icon: TrendingUp },
     ],
   },
   {

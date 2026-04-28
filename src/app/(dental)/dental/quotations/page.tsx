@@ -21,7 +21,7 @@ export default async function QuotationsPage() {
 
   const { data: quotations } = await supabase
     .from('quotations')
-    .select('*, patients (id, first_name, last_name, phone), professionals (first_name, last_name, title)')
+    .select('*, patients (id, first_name, last_name, phone)')
     .eq('tenant_id', profile.tenant.id)
     .order('created_at', { ascending: false })
     .limit(200);
@@ -60,7 +60,7 @@ export default async function QuotationsPage() {
       if (!acceptedDate) return false;
       return new Date(acceptedDate) >= startMonth;
     })
-    .reduce((sum, q) => sum + Number(q.total_amount || q.cost || 0), 0);
+    .reduce((sum, q) => sum + Number(q.total_amount || 0), 0);
 
   return (
     <div className="space-y-4">

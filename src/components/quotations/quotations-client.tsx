@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import {
   getStatusConfig,
+  parseQuotationNotes,
   type QuotationWithPatient,
   type QuotationStatus,
 } from '@/lib/types/quotation';
@@ -58,8 +59,8 @@ export function QuotationsClient({ quotations }: Props) {
       const patient = quot.patients ? quot.patients.first_name + ' ' + quot.patients.last_name : '';
       const haystack = [
         quot.quotation_number || '',
-        quot.title || '',
-        quot.description || '',
+        parseQuotationNotes(quot.notes).title,
+        parseQuotationNotes(quot.notes).description,
         patient,
       ].join(' ').toLowerCase();
       return haystack.includes(q);
@@ -169,7 +170,7 @@ function DesktopRow({ q }: { q: QuotationWithPatient }) {
         {q.patients?.phone && <div className="text-xs text-slate-500 mt-0.5">{q.patients.phone}</div>}
       </td>
       <td className="px-4 py-3">
-        <div className="text-sm font-medium text-slate-900 line-clamp-1">{q.title || '-'}</div>
+        <div className="text-sm font-medium text-slate-900 line-clamp-1">{parseQuotationNotes(q.notes).title}</div>
         {q.items_count > 0 && (
           <div className="text-[11px] text-slate-500 mt-0.5">
             {q.items_count} {q.items_count === 1 ? 'tratamiento' : 'tratamientos'}
@@ -182,7 +183,7 @@ function DesktopRow({ q }: { q: QuotationWithPatient }) {
         </span>
       </td>
       <td className="px-4 py-3 text-right">
-        <div className="text-sm font-bold text-slate-900 tabular-nums">{formatMoney(q.total_amount || q.cost)}</div>
+        <div className="text-sm font-bold text-slate-900 tabular-nums">{formatMoney(q.total_amount)}</div>
       </td>
       <td className="px-4 py-3 text-right">
         <Link href={'/dental/quotations/' + q.id} className="inline-flex items-center gap-1 rounded-lg p-1.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 transition">
@@ -213,10 +214,10 @@ function MobileCard({ q }: { q: QuotationWithPatient }) {
             {dateLabel ? formatDate(dateLabel) : '-'}
           </div>
           <p className="mt-1.5 text-sm font-bold text-slate-900 truncate">{patientName}</p>
-          <p className="text-xs text-slate-600 line-clamp-1 mt-0.5">{q.title || '-'}</p>
+          <p className="text-xs text-slate-600 line-clamp-1 mt-0.5">{parseQuotationNotes(q.notes).title}</p>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-base font-bold text-slate-900 tabular-nums">{formatMoney(q.total_amount || q.cost)}</div>
+          <div className="text-base font-bold text-slate-900 tabular-nums">{formatMoney(q.total_amount)}</div>
           {q.items_count > 0 && <div className="text-[10px] text-slate-500 mt-0.5">{q.items_count} item{q.items_count === 1 ? '' : 's'}</div>}
           <ArrowRight className="ml-auto mt-1 h-3.5 w-3.5 text-slate-300" />
         </div>
