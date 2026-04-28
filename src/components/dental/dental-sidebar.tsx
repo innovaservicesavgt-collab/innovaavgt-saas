@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
+import { LayoutDashboard,
   Calendar,
   CalendarClock,
   Users,
@@ -20,8 +19,7 @@ import {
   TrendingUp,
   Settings,
   LogOut,
-  Stethoscope,
-} from 'lucide-react';
+  Stethoscope, BarChart3, MessageSquare } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 type NavItem = {
@@ -71,6 +69,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/dental/treatments', label: 'Tratamientos', icon: Activity, feature: 'treatment_plans' },
       { href: '/dental/payments', label: 'Pagos', icon: Wallet, feature: 'payments' },
   { href: '/dental/dashboard/cobranza', label: 'Cobranza', icon: TrendingUp },
+  { href: '/dental/reminders', label: 'Recordatorios', icon: MessageSquare },
+  { href: '/dental/dashboard/reports', label: 'Reportes', icon: BarChart3 },
     ],
   },
   {

@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import {
-  User,
+import { User,
   ClipboardList,
   CalendarClock,
   Wallet,
@@ -27,8 +26,7 @@ import {
   Stethoscope,
   CircleDollarSign,
   ArrowRight,
-  Activity,
-} from 'lucide-react';
+  Activity, Pill, ClipboardSignature } from 'lucide-react';
 import type { PatientFull, AppointmentForPatient } from '@/app/(dental)/dental/patients/[id]/page';
 import { MedicalTab as MedicalTabFull } from './medical-tab';
 import type { PatientMetadata } from '@/lib/types/medical-history';
@@ -692,21 +690,60 @@ function PaymentsTab({
 // ─────────────── TAB: DOCUMENTOS ───────────────
 function DocumentsTab({ patientId }: { patientId: string }) {
   return (
-    <Section title="Documentos" icon={<FileText className="h-4 w-4 text-blue-600" />}>
-      <div className="py-12 text-center">
-        <FileText className="mx-auto h-12 w-12 text-slate-300" />
-        <p className="mt-3 text-base font-bold text-slate-900">Sin documentos</p>
-        <p className="mt-1 text-sm text-slate-500 max-w-md mx-auto">
-          Aquí podrás subir radiografías, consentimientos firmados, recetas, fotografías clínicas y más.
-        </p>
-        <button
-          type="button"
-          disabled
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 cursor-not-allowed"
+    <Section
+      title="Documentos clinicos"
+      icon={<FileText className="h-4 w-4 text-blue-600" />}
+      action={
+        <Link
+          href={'/dental/patients/' + patientId + '/documents'}
+          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
         >
-          <Plus className="h-4 w-4" />
-          Subir documento (próximamente)
-        </button>
+          Ver todos
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      }
+    >
+      <div className="py-3 space-y-3">
+        {/* Cards de acceso rapido */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href={'/dental/patients/' + patientId + '/documents/prescriptions/new'}
+            className="group rounded-2xl border-2 border-violet-200 bg-violet-50 p-4 hover:border-violet-400 hover:shadow-md transition"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white">
+                <Pill className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-violet-400 group-hover:translate-x-1 transition" />
+            </div>
+            <h3 className="mt-2 text-sm font-bold text-slate-900">Recetas medicas</h3>
+            <p className="text-xs text-slate-600 mt-0.5">Crear receta con medicamentos, dosis y duracion</p>
+            <p className="mt-2 text-xs font-bold text-violet-700">+ Nueva receta</p>
+          </Link>
+
+          <Link
+            href={'/dental/patients/' + patientId + '/documents/consents/new'}
+            className="group rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 hover:border-emerald-400 hover:shadow-md transition"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white">
+                <ClipboardSignature className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition" />
+            </div>
+            <h3 className="mt-2 text-sm font-bold text-slate-900">Consentimientos</h3>
+            <p className="text-xs text-slate-600 mt-0.5">Plantillas legales para Guatemala con firma digital</p>
+            <p className="mt-2 text-xs font-bold text-emerald-700">+ Nuevo consentimiento</p>
+          </Link>
+        </div>
+
+        {/* Tip */}
+        <div className="rounded-xl bg-blue-50 border border-blue-200 px-3 py-2 flex items-start gap-2 text-xs text-blue-900">
+          <FileText className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <p>
+            Haz click en <strong>Ver todos</strong> para abrir el listado completo de recetas y consentimientos del paciente con vistas imprimibles.
+          </p>
+        </div>
       </div>
     </Section>
   );
