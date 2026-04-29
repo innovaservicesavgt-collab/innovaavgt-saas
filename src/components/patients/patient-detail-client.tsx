@@ -26,7 +26,7 @@ import { User,
   Stethoscope,
   CircleDollarSign,
   ArrowRight,
-  Activity, Pill, ClipboardSignature } from 'lucide-react';
+  Activity, Pill, ClipboardSignature, Camera } from 'lucide-react';
 import type { PatientFull, AppointmentForPatient } from '@/app/(dental)/dental/patients/[id]/page';
 import { MedicalTab as MedicalTabFull } from './medical-tab';
 import type { PatientMetadata } from '@/lib/types/medical-history';
@@ -705,7 +705,22 @@ function DocumentsTab({ patientId }: { patientId: string }) {
     >
       <div className="py-3 space-y-3">
         {/* Cards de acceso rapido */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link
+            href={'/dental/patients/' + patientId + '/gallery'}
+            className="group rounded-2xl border-2 border-blue-200 bg-blue-50 p-4 hover:border-blue-400 hover:shadow-md transition"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
+                <Camera className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-blue-400 group-hover:translate-x-1 transition" />
+            </div>
+            <h3 className="mt-2 text-sm font-bold text-slate-900">Galeria clinica</h3>
+            <p className="text-xs text-slate-600 mt-0.5">Fotos antes/despues, radiografias, intraorales</p>
+            <p className="mt-2 text-xs font-bold text-blue-700">Ver galeria</p>
+          </Link>
+
           <Link
             href={'/dental/patients/' + patientId + '/documents/prescriptions/new'}
             className="group rounded-2xl border-2 border-violet-200 bg-violet-50 p-4 hover:border-violet-400 hover:shadow-md transition"
