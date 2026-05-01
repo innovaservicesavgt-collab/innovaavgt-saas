@@ -95,8 +95,8 @@ export default function LoginPage() {
           </button>
           <p className="mt-4 text-center text-sm text-gray-600">
             No tienes cuenta?{' '}
-            <Link href="/register" className="text-blue-600 hover:underline">
-              Registra tu negocio
+            <Link href="/signup" className="text-blue-600 hover:underline">
+              Crea tu cuenta gratis
             </Link>
           </p>
         </form>

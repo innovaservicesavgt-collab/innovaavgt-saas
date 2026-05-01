@@ -22,8 +22,8 @@ function MainLanding() {
           <Link href="/login" className="px-4 py-2 text-sm font-medium text-blue-700 hover:text-blue-900 transition">
             Iniciar sesión
           </Link>
-          <Link href="/register" className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            Registrar mi negocio
+          <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            Crear cuenta gratis
           </Link>
         </div>
       </header>
@@ -37,7 +37,7 @@ function MainLanding() {
           Plataforma profesional para clínicas dentales, consultorios médicos y negocios con agenda. Tu propio portal de reservas en minutos.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
-          <Link href="/register" className="px-8 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-600/30">
+          <Link href="/signup" className="px-8 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-600/30">
             Comenzar gratis
           </Link>
           <Link href="#features" className="px-8 py-3 bg-white text-gray-700 text-lg font-medium rounded-lg hover:bg-gray-50 transition border border-gray-200">

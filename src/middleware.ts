@@ -1,6 +1,7 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
@@ -8,29 +9,20 @@ export async function middleware(request: NextRequest) {
   const PORT = process.env.PORT || '3000';
 
   let slug = hostname
-    .replace(`.${APP_DOMAIN}`, '')
-    .replace(`.localhost:${PORT}`, '')
+    .replace('.' + APP_DOMAIN, '')
+    .replace('.localhost:' + PORT, '')
     .replace('.localhost', '');
 
   const isMainDomain =
-    hostname === APP_DOMAIN ||
-    hostname === `www.${APP_DOMAIN}` ||
-    hostname === `localhost:${PORT}` ||
-    hostname === 'localhost';
+    hostname === APP_DOMAIN || hostname === 'www.' + APP_DOMAIN ||
+    hostname === 'localhost:' + PORT || hostname === 'localhost';
 
   const isSubdomain = !isMainDomain && slug !== hostname;
 
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  });
+  let response = NextResponse.next({ request: { headers: request.headers } });
 
-  if (isSubdomain) {
-    response.headers.set('x-tenant-slug', slug);
-    response.headers.set('x-is-tenant', 'true');
-  } else {
-    response.headers.set('x-is-tenant', 'false');
-    slug = '';
-  }
+  if (isSubdomain) { response.headers.set('x-tenant-slug', slug); response.headers.set('x-is-tenant', 'true'); }
+  else { response.headers.set('x-is-tenant', 'false'); slug = ''; }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,19 +31,11 @@ export async function middleware(request: NextRequest) {
       cookies: {
         getAll() { return request.cookies.getAll(); },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
+          cookiesToSet.forEach(({ name, value }) => { request.cookies.set(name, value); });
           response = NextResponse.next({ request: { headers: request.headers } });
-          if (isSubdomain) {
-            response.headers.set('x-tenant-slug', slug);
-            response.headers.set('x-is-tenant', 'true');
-          } else {
-            response.headers.set('x-is-tenant', 'false');
-          }
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
+          if (isSubdomain) { response.headers.set('x-tenant-slug', slug); response.headers.set('x-is-tenant', 'true'); }
+          else { response.headers.set('x-is-tenant', 'false'); }
+          cookiesToSet.forEach(({ name, value, options }) => { response.cookies.set(name, value, options); });
         },
       },
     }
@@ -64,22 +48,54 @@ export async function middleware(request: NextRequest) {
   const adminPaths = ['/admin'];
   const isProtected = protectedPaths.some((x) => p.startsWith(x));
   const isAdminPath = adminPaths.some((x) => p.startsWith(x));
+  const isOnboardingPath = p.startsWith('/onboarding');
 
-  if ((isProtected || isAdminPath) && !user) {
+  // 1. Bloquear acceso si no hay sesion
+  if ((isProtected || isAdminPath || isOnboardingPath) && !user) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', p);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && (p === '/login' || p === '/register')) {
+  // 2. Si esta logueado y va a login/signup, redirigir
+  if (user && (p === '/login' || p === '/register' || p === '/signup')) {
     return NextResponse.redirect(new URL('/dental/dashboard', request.url));
+  }
+
+  // 3. Si esta logueado y entra a un dashboard, verificar onboarding (con admin client - lectura fresca)
+  if (user && (p === '/dental/dashboard' || p === '/legal/dashboard')) {
+    try {
+      const adminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const adminKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+      const adminClient = createClient(adminUrl, adminKey, { auth: { autoRefreshToken: false, persistSession: false } });
+
+      const { data: profile } = await adminClient
+        .from('profiles').select('tenant_id, is_superadmin').eq('id', user.id).single();
+
+      const profileTyped = profile as { tenant_id?: string | null; is_superadmin?: boolean | null } | null;
+      if (profileTyped?.is_superadmin) {
+        return response; // superadmin no tiene wizard
+      }
+
+      if (profileTyped?.tenant_id) {
+        const { data: tenant } = await adminClient
+          .from('tenants').select('is_onboarding_complete').eq('id', profileTyped.tenant_id).single();
+        const tenantTyped = tenant as { is_onboarding_complete?: boolean | null } | null;
+
+        if (tenantTyped && tenantTyped.is_onboarding_complete !== true) {
+          console.log('[middleware] tenant ' + profileTyped.tenant_id + ' onboarding incompleto, redirigiendo a /onboarding');
+          return NextResponse.redirect(new URL('/onboarding', request.url));
+        }
+      }
+    } catch (e) {
+      console.error('[middleware] error verificando onboarding:', e);
+      // En caso de error, no bloquear - dejar pasar
+    }
   }
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',],
 };

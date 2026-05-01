@@ -1,13 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-/**
- * Cliente Supabase con privilegios de administrador (bypass RLS).
- * SOLO usar en Server Actions, Route Handlers y Cron Jobs.
- * NUNCA expongas este cliente al navegador.
- */
+let cachedClient: SupabaseClient | null = null;
 
-// Validación de variables de entorno
-function getEnvVars() {
+export function getAdminSupabase(): SupabaseClient {
+  if (cachedClient) return cachedClient;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -15,34 +12,23 @@ function getEnvVars() {
     throw new Error('Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY');
   }
 
-  return { url, serviceKey };
-}
-
-/**
- * Factory function para crear un cliente admin fresco.
- * Usada por el módulo legal (ej: cron de recordatorios).
- */
-export function createAdminSupabase() {
-  const { url, serviceKey } = getEnvVars();
-
-  return createClient(url, serviceKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
+  cachedClient = createClient(url, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  return cachedClient;
 }
 
-/**
- * Cliente admin pre-creado (singleton).
- * Usado por el módulo superadmin del sistema dental.
- * Mantiene compatibilidad con código existente.
- */
-export const supabaseAdmin = (() => {
-  try {
-    return createAdminSupabase();
-  } catch {
-    // Durante el build si no hay env vars, devolver null y lo manejamos al usar
-    return null as unknown as ReturnType<typeof createAdminSupabase>;
-  }
-})();
+// Wrappers de compatibilidad con codigo viejo
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getAdminSupabase();
+    const value = (client as unknown as Record<string | symbol, unknown>)[prop as string];
+    if (typeof value === 'function') {
+      return (value as (...args: unknown[]) => unknown).bind(client);
+    }
+    return value;
+  },
+});
+
+export const createAdminSupabase = getAdminSupabase;

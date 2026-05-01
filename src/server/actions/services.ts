@@ -5,208 +5,137 @@ import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { getCurrentProfile } from '@/lib/tenant';
 
-// ─────────────────────────────────────────────────────────────
-// Schemas
-// ─────────────────────────────────────────────────────────────
-const upsertServiceSchema = z.object({
-  id: z.string().uuid().optional(),
-  name: z.string().min(1, 'Nombre requerido').max(200),
-  description: z.string().max(2000).optional().nullable(),
-  duration_minutes: z.number().int().min(5).max(480),
-  price: z.number().min(0).optional().nullable(),
-  category: z.string().max(50).optional().nullable(),
-  color: z.string().max(20).optional().nullable(),
+const serviceSchema = z.object({
+  id: z.string().uuid().optional().nullable(),
+  name: z.string().min(2).max(200),
+  description: z.string().max(500).optional().nullable(),
+  category: z.string().max(100).optional().nullable(),
+  price: z.number().min(0).max(999999),
+  duration_minutes: z.number().int().positive().max(600),
   buffer_minutes: z.number().int().min(0).max(120).optional().nullable(),
-  requires_confirmation: z.boolean().optional().nullable(),
-  is_active: z.boolean().optional(),
+  color: z.string().max(20).optional().nullable(),
+  requires_confirmation: z.boolean().default(false),
+  is_active: z.boolean().default(true),
 });
 
-const toggleSchema = z.object({
-  id: z.string().uuid(),
-  is_active: z.boolean(),
-});
+export type ServiceInput = z.input<typeof serviceSchema>;
 
-const deleteSchema = z.object({
-  id: z.string().uuid(),
-});
+export async function saveService(input: ServiceInput) {
+  console.log('[settings.services] saveService - input:', input);
 
-function clean(v: string | null | undefined): string | null {
-  if (v == null) return null;
-  const t = v.trim();
-  return t.length === 0 ? null : t;
-}
-
-// ─────────────────────────────────────────────────────────────
-// createService
-// ─────────────────────────────────────────────────────────────
-export async function createService(input: z.infer<typeof upsertServiceSchema>) {
   const profile = await getCurrentProfile();
-  if (!profile?.tenant) {
-    return { ok: false as const, error: 'No autorizado' };
+  if (!profile?.tenant) return { ok: false as const, error: 'No autorizado' };
+
+  if (profile.role?.name !== 'admin' && !profile.is_superadmin) {
+    return { ok: false as const, error: 'Solo el administrador puede editar' };
   }
 
-  const parsed = upsertServiceSchema.safeParse(input);
+  const parsed = serviceSchema.safeParse(input);
   if (!parsed.success) {
-    return {
-      ok: false as const,
-      error: parsed.error.issues[0]?.message || 'Datos invalidos',
-    };
+    return { ok: false as const, error: parsed.error.issues[0]?.message || 'Datos invalidos' };
   }
 
-  const supabase = await createServerSupabase();
   const data = parsed.data;
+  const supabase = await createServerSupabase();
 
-  const { data: created, error } = await supabase
-    .from('services')
-    .insert({
+  if (data.id) {
+    const payload: Record<string, unknown> = {
+      name: data.name.trim(),
+      price: data.price,
+      duration_minutes: data.duration_minutes,
+      is_active: data.is_active,
+      requires_confirmation: data.requires_confirmation,
+      updated_at: new Date().toISOString(),
+    };
+    if (data.description !== undefined) payload.description = data.description?.trim() || null;
+    if (data.category) payload.category = data.category.trim();
+    if (data.buffer_minutes !== undefined) payload.buffer_minutes = data.buffer_minutes;
+    if (data.color) payload.color = data.color;
+
+    const { error } = await supabase
+      .from('services')
+      .update(payload)
+      .eq('id', data.id)
+      .eq('tenant_id', profile.tenant.id);
+
+    if (error) return { ok: false as const, error: error.message };
+  } else {
+    const payload: Record<string, unknown> = {
       tenant_id: profile.tenant.id,
       name: data.name.trim(),
-      description: clean(data.description),
-      duration_minutes: data.duration_minutes,
-      price: data.price ?? null,
+      price: data.price,
       currency: 'GTQ',
-      category: clean(data.category),
-      color: clean(data.color) || '#10B981',
-      buffer_minutes: data.buffer_minutes ?? 0,
-      requires_confirmation: data.requires_confirmation ?? false,
-      is_active: data.is_active ?? true,
-    })
-    .select('id')
-    .single();
+      duration_minutes: data.duration_minutes,
+      is_active: data.is_active,
+      requires_confirmation: data.requires_confirmation,
+    };
+    if (data.description) payload.description = data.description.trim();
+    if (data.category) payload.category = data.category.trim();
+    if (data.buffer_minutes !== undefined) payload.buffer_minutes = data.buffer_minutes;
+    if (data.color) payload.color = data.color;
 
-  if (error || !created) {
-    return { ok: false as const, error: 'Error al crear servicio' };
+    const { error } = await supabase.from('services').insert(payload);
+    if (error) return { ok: false as const, error: error.message };
   }
 
-  revalidatePath('/dental/services');
-  return { ok: true as const, id: created.id };
+  revalidatePath('/dental/settings');
+  return { ok: true as const };
 }
 
-// ─────────────────────────────────────────────────────────────
-// updateService
-// ─────────────────────────────────────────────────────────────
-export async function updateService(input: z.infer<typeof upsertServiceSchema>) {
+export async function toggleServiceActive(id: string, newState: boolean) {
   const profile = await getCurrentProfile();
-  if (!profile?.tenant) {
-    return { ok: false as const, error: 'No autorizado' };
-  }
+  if (!profile?.tenant) return { ok: false as const, error: 'No autorizado' };
 
-  const parsed = upsertServiceSchema.safeParse(input);
-  if (!parsed.success || !parsed.data.id) {
-    return {
-      ok: false as const,
-      error: parsed.success
-        ? 'ID requerido'
-        : parsed.error.issues[0]?.message || 'Datos invalidos',
-    };
+  if (profile.role?.name !== 'admin' && !profile.is_superadmin) {
+    return { ok: false as const, error: 'Solo el administrador puede editar' };
   }
 
   const supabase = await createServerSupabase();
-  const { id, ...data } = parsed.data;
-
   const { error } = await supabase
     .from('services')
-    .update({
-      name: data.name.trim(),
-      description: clean(data.description),
-      duration_minutes: data.duration_minutes,
-      price: data.price ?? null,
-      category: clean(data.category),
-      color: clean(data.color) || '#10B981',
-      buffer_minutes: data.buffer_minutes ?? 0,
-      requires_confirmation: data.requires_confirmation ?? false,
-      is_active: data.is_active ?? true,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ is_active: newState, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('tenant_id', profile.tenant.id);
 
-  if (error) {
-    return { ok: false as const, error: 'Error al actualizar servicio' };
-  }
+  if (error) return { ok: false as const, error: error.message };
 
-  revalidatePath('/dental/services');
-  revalidatePath(`/dental/services/${id}/edit`);
+  revalidatePath('/dental/settings');
   return { ok: true as const };
 }
 
-// ─────────────────────────────────────────────────────────────
-// toggleServiceActive
-// ─────────────────────────────────────────────────────────────
-export async function toggleServiceActive(input: z.infer<typeof toggleSchema>) {
+export async function quickUpdateServicePrice(id: string, newPrice: number) {
   const profile = await getCurrentProfile();
-  if (!profile?.tenant) {
-    return { ok: false as const, error: 'No autorizado' };
+  if (!profile?.tenant) return { ok: false as const, error: 'No autorizado' };
+
+  if (profile.role?.name !== 'admin' && !profile.is_superadmin) {
+    return { ok: false as const, error: 'Solo el administrador puede editar' };
   }
 
-  const parsed = toggleSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false as const, error: 'Datos invalidos' };
+  if (newPrice < 0 || newPrice > 999999) {
+    return { ok: false as const, error: 'Precio invalido' };
   }
 
   const supabase = await createServerSupabase();
   const { error } = await supabase
     .from('services')
-    .update({
-      is_active: parsed.data.is_active,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', parsed.data.id)
+    .update({ price: newPrice, updated_at: new Date().toISOString() })
+    .eq('id', id)
     .eq('tenant_id', profile.tenant.id);
 
-  if (error) {
-    return { ok: false as const, error: 'Error al cambiar estado' };
-  }
+  if (error) return { ok: false as const, error: error.message };
 
-  revalidatePath('/dental/services');
+  revalidatePath('/dental/settings');
   return { ok: true as const };
 }
 
-// ─────────────────────────────────────────────────────────────
-// deleteService (solo si nunca se uso en cotizaciones o citas)
-// ─────────────────────────────────────────────────────────────
-export async function deleteService(input: z.infer<typeof deleteSchema>) {
-  const profile = await getCurrentProfile();
-  if (!profile?.tenant) {
-    return { ok: false as const, error: 'No autorizado' };
-  }
+// ─── WRAPPERS DE COMPATIBILIDAD ──────────────────────────────
+// Para que el componente viejo src/components/services/service-form.tsx
+// siga funcionando sin tener que tocarlo.
 
-  const parsed = deleteSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false as const, error: 'ID invalido' };
-  }
+export async function createService(input: ServiceInput) {
+  return saveService({ ...input, id: null });
+}
 
-  const supabase = await createServerSupabase();
-
-  // Verificar si esta en uso
-  const { count: appointmentCount } = await supabase
-    .from('appointments')
-    .select('*', { count: 'exact', head: true })
-    .eq('service_id', parsed.data.id);
-
-  const { count: itemCount } = await supabase
-    .from('quotation_items')
-    .select('*', { count: 'exact', head: true })
-    .eq('service_id', parsed.data.id);
-
-  if ((appointmentCount || 0) > 0 || (itemCount || 0) > 0) {
-    return {
-      ok: false as const,
-      error:
-        'No se puede eliminar: el servicio esta en uso en citas o cotizaciones. Mejor desactivalo.',
-    };
-  }
-
-  const { error } = await supabase
-    .from('services')
-    .delete()
-    .eq('id', parsed.data.id)
-    .eq('tenant_id', profile.tenant.id);
-
-  if (error) {
-    return { ok: false as const, error: 'Error al eliminar servicio' };
-  }
-
-  revalidatePath('/dental/services');
-  return { ok: true as const };
+export async function updateService(id: string, input: ServiceInput) {
+  return saveService({ ...input, id });
 }
